@@ -1,4 +1,4 @@
-from typing import Optional
+﻿from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import or_, select
@@ -114,6 +114,40 @@ async def log_login(
     await db.commit()
 
 
+async def get_optional_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[User]:
+    """Optional auth dependency.
+
+    No token -> guest user (None).
+    Valid token -> current user.
+    Invalid token -> treated as unauthenticated guest.
+    """
+    if credentials is None:
+        return None
+
+    try:
+        payload = decode_access_token(credentials.credentials)
+    except ValueError:
+        return None
+
+    user_id = payload.get("sub")
+    if user_id is None:
+        return None
+
+    try:
+        stmt = select(User).where(User.id == int(user_id))
+        res = await db.execute(stmt)
+        user = res.scalars().first()
+    except (TypeError, ValueError):
+        return None
+
+    if user is None or not user.is_active:
+        return None
+
+    return user
+
 async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: AsyncSession = Depends(get_db),
@@ -149,3 +183,4 @@ async def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
 
     return user
+

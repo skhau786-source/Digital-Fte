@@ -6,7 +6,7 @@
 #          customer_support, collaboration — sab agents LLM calls
 #          ke liye yehi use karte hain.
 #
-# PROVIDER: Google Gemini (gemini-2.0-flash-exp default)
+# PROVIDER: Google Gemini (gemini-3.5-flash-lite default)
 # USED BY: content_generation, comment_engagement, customer_support,
 #          collaboration_orchestrator
 # ═══════════════════════════════════════════════════════════════
@@ -48,7 +48,7 @@ class LLMClient:
     def __init__(
         self,
         api_key: str,
-        model: str = "gemini-2.0-flash-exp",
+        model: str = "gemini-3.5-flash-lite",
         max_concurrent: int = 3,
     ):
         self.api_key = api_key
@@ -69,14 +69,23 @@ class LLMClient:
                     "Set GEMINI_API_KEY in your .env file.",
                     code=503,
                 )
+
             genai.configure(api_key=self.api_key)
-            self._model_instance = genai.GenerativeModel(self.model)
-            logger.info("LLM client initialized with model: %s", self.model)
+
+            self._model_instance = genai.GenerativeModel(
+                self.model
+            )
+
+            logger.info(
+                "LLM client initialized with model: %s",
+                self.model,
+            )
+
         return self._model_instance
 
     # ─── generate() ──────────────────────────────────────────
     # Send a text prompt to the LLM and get a text response.
-    # Used by: content_generation (3x), comment_engagement,
+    # Used by: content_generation, comment_engagement,
     #          customer_support, analytics_insights,
     #          collaboration_orchestrator
 
@@ -87,20 +96,31 @@ class LLMClient:
         max_tokens: int = 1000,
     ) -> str:
         """Send prompt to LLM, return text response.
+
         Rate-limited to max_concurrent calls.
         """
+
         async with self._rate_limiter:
             model = self._get_model()
 
-            # Combine system + user prompt (Gemini uses single prompt string)
-            full_prompt = f"{system}\n\n{prompt}" if system else prompt
+            # Combine system + user prompt.
+            # Gemini uses a single prompt string.
+            full_prompt = (
+                f"{system}\n\n{prompt}"
+                if system
+                else prompt
+            )
 
-            # Try with exponential backoff
-            for attempt, delay in enumerate((0.0,) + RETRY_DELAYS):
+            # Try with exponential backoff.
+            for attempt, delay in enumerate(
+                (0.0,) + RETRY_DELAYS
+            ):
                 if delay > 0:
                     await asyncio.sleep(delay)
+
                 try:
-                    # Gemini SDK is sync — run in thread to avoid blocking event loop
+                    # Gemini SDK is sync — run in a thread
+                    # to avoid blocking the async event loop.
                     response = await asyncio.to_thread(
                         model.generate_content,
                         full_prompt,
@@ -109,56 +129,93 @@ class LLMClient:
                         ),
                     )
 
-                    # Track token usage (rough estimate: 1 token ≈ 4 chars)
-                    self.token_usage["input"] += len(full_prompt) // 4
-                    self.token_usage["output"] += len(response.text) // 4
+                    # Track token usage.
+                    # Rough estimate: 1 token ≈ 4 characters.
+                    response_text = response.text
+
+                    self.token_usage["input"] += (
+                        len(full_prompt) // 4
+                    )
+                    self.token_usage["output"] += (
+                        len(response_text) // 4
+                    )
                     self.token_usage["calls"] += 1
 
                     logger.info(
-                        "LLM call #%d (in=%d, out=%d tokens, model=%s)",
+                        "LLM call #%d "
+                        "(in=%d, out=%d tokens, model=%s)",
                         self.token_usage["calls"],
                         self.token_usage["input"],
                         self.token_usage["output"],
                         self.model,
                     )
-                    return response.text
+
+                    return response_text
 
                 except RETRYABLE_EXCEPTIONS as e:
                     if attempt >= len(RETRY_DELAYS):
-                        logger.error("LLM call failed after %d retries: %s", len(RETRY_DELAYS), e)
+                        logger.error(
+                            "LLM call failed after %d retries: %s",
+                            len(RETRY_DELAYS),
+                            e,
+                        )
+
                         raise LLMError(
                             f"Gemini call failed after retries: {e}",
                             code=502,
                         ) from e
-                    logger.warning("LLM retry %d/%d: %s", attempt + 1, len(RETRY_DELAYS), e)
+
+                    logger.warning(
+                        "LLM retry %d/%d: %s",
+                        attempt + 1,
+                        len(RETRY_DELAYS),
+                        e,
+                    )
+
                     continue
 
                 except Exception as e:
-                    # Non-retryable error (e.g., invalid API key, quota exceeded)
-                    logger.exception("LLM call failed with non-retryable error: %s", e)
+                    # Non-retryable error.
+                    logger.exception(
+                        "LLM call failed with non-retryable error: %s",
+                        e,
+                    )
+
                     raise LLMError(
                         f"Gemini error: {str(e)}",
                         code=500,
                     ) from e
 
-            # Should never reach here, but just in case
-            raise LLMError("LLM call exhausted retries", code=502)
+            # Should never reach here.
+            raise LLMError(
+                "LLM call exhausted retries",
+                code=502,
+            )
 
     # ─── generate_structured() ───────────────────────────────
     # Send a prompt + JSON schema → LLM returns structured dict.
     # Uses Gemini's native response_schema for JSON output.
     # For: sentiment scores, classification, extraction.
 
-    async def generate_structured(self, prompt: str, schema: dict) -> dict:
+    async def generate_structured(
+        self,
+        prompt: str,
+        schema: dict,
+    ) -> dict:
         """Get validated structured JSON output from LLM.
+
         Uses Gemini's response_schema parameter.
         """
+
         async with self._rate_limiter:
             model = self._get_model()
 
-            for attempt, delay in enumerate((0.0,) + RETRY_DELAYS):
+            for attempt, delay in enumerate(
+                (0.0,) + RETRY_DELAYS
+            ):
                 if delay > 0:
                     await asyncio.sleep(delay)
+
                 try:
                     response = await asyncio.to_thread(
                         model.generate_content,
@@ -170,9 +227,13 @@ class LLMClient:
                     )
 
                     self.token_usage["calls"] += 1
-                    logger.info("LLM structured call #%d", self.token_usage["calls"])
 
-                    # Parse JSON response
+                    logger.info(
+                        "LLM structured call #%d",
+                        self.token_usage["calls"],
+                    )
+
+                    # Parse JSON response.
                     return json.loads(response.text)
 
                 except RETRYABLE_EXCEPTIONS as e:
@@ -181,7 +242,13 @@ class LLMClient:
                             f"Gemini structured call failed: {e}",
                             code=502,
                         ) from e
-                    logger.warning("LLM structured retry %d: %s", attempt + 1, e)
+
+                    logger.warning(
+                        "Gemini structured retry %d: %s",
+                        attempt + 1,
+                        e,
+                    )
+
                     continue
 
                 except json.JSONDecodeError as e:
@@ -191,18 +258,27 @@ class LLMClient:
                     ) from e
 
                 except Exception as e:
-                    logger.exception("LLM structured call failed: %s", e)
+                    logger.exception(
+                        "LLM structured call failed: %s",
+                        e,
+                    )
+
                     raise LLMError(
                         f"Gemini structured error: {str(e)}",
                         code=500,
                     ) from e
 
-            raise LLMError("LLM structured call exhausted retries", code=502)
+            raise LLMError(
+                "LLM structured call exhausted retries",
+                code=502,
+            )
 
     # ─── close() ──────────────────────────────────────────────
-    # Cleanup — close the SDK client (if any persistent connections)
+    # Cleanup — clear the lazy SDK model instance.
 
     async def close(self) -> None:
         """Close the LLM client and release resources."""
+
         self._model_instance = None
+
         logger.info("LLM client closed")
