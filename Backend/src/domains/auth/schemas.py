@@ -16,6 +16,10 @@ class SignupRequest(BaseModel):
             raise ValueError("Password must contain at least one digit")
         if not any(c.isupper() for c in v):
             raise ValueError("Password must contain at least one uppercase letter")
+        if not any(c.islower() for c in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not any(not c.isalnum() for c in v):
+            raise ValueError("Password must contain at least one special character")
         return v
 
 
@@ -64,8 +68,13 @@ class ResetPasswordRequest(BaseModel):
             raise ValueError("Password must contain at least one digit")
         if not any(c.isupper() for c in v):
             raise ValueError("Password must contain at least one uppercase letter")
+        if not any(c.islower() for c in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not any(not c.isalnum() for c in v):
+            raise ValueError("Password must contain at least one special character")
         return v
 
 
 class MessageResponse(BaseModel):
     message: str
+
