@@ -7,6 +7,7 @@ export const translations = {
       howItWorks: "How It Works",
       pricing: "Pricing",
       about: "About",
+      contact: "Contact",
       english: "English",
       urdu: "اردو (Urdu)",
       selectLanguage: "Language",
@@ -41,6 +42,13 @@ export const translations = {
         "Stop hiring. Start automating. One AI agent manages your entire e-commerce operation — from inventory to social media to customer support.",
       ctaPrimary: "Start Free Trial",
       ctaSecondary: "See How It Works",
+      benefitFast: "Fast and Secure",
+      benefitFastDesc: "Get set up quickly with protected onboarding.",
+      benefitNoCard: "No Credit Card",
+      benefitNoCardDesc: "Try the AI workflow risk-free before paying.",
+      benefitCancel: "Cancel Anytime",
+      benefitCancelDesc: "Keep control of your plan without commitment.",
+      demoLabel: "Watch Demo",
       trustLine: "Trusted by 500+ store owners • No credit card required",
     },
 
@@ -231,6 +239,8 @@ export const translations = {
       logOut: "Log Out",
       signIn: "Sign In",
       signUp: "Create Account",
+      loginDesc: "Log in to command your autonomous e-commerce workforce.",
+      signupDesc: "No credit card required. Instantly deploy your first AI employee.",
       emailLabel: "Email Address",
       emailPlaceholder: "you@example.com",
       passwordLabel: "Password",
@@ -385,7 +395,7 @@ export const translations = {
       step1: {
         greeting: "Hi",
         headline: "Welcome to Digital FTE",
-        sub: "Let's walk through seven guided setup steps to launch your AI employee.",
+        sub: "Let's walk through six guided setup steps to launch your AI employee.",
         connectStore: "Connect Store",
         connectSocial: "Connect Social",
         readyLabel: "Ready!",
@@ -436,6 +446,8 @@ export const translations = {
         title: "Connect Social Channels",
         desc: "Enable autonomous AI social posting and engagement",
         oauthLabel: "OAuth 2.0 Encrypted",
+        connect: "Connect",
+        disconnect: "Disconnect",
         reachTitle: "Estimated Social Reach Impact",
         reachDesc: "~45,000+ Potential Organic Audience Impressions / Mo",
         aiAutomated: "AI Automated",
@@ -454,6 +466,7 @@ export const translations = {
         launchBtn: "🚀 Launch Digital FTE",
         backBtn: "← Back",
         launching: "Launching...",
+        robotMsg: "All systems green! I'm fully trained and ready to manage your store. Let's launch! 🚀",
       },
       step7: {
         title: "Your AI is Being Activated!",
@@ -471,6 +484,7 @@ export const translations = {
 
     // ─── Common ───────────────────────────────────────────────────────────────
     common: {
+      step: "Step",
       back: "← Back",
       next: "Next",
       save: "Save",
@@ -478,6 +492,54 @@ export const translations = {
       loading: "Loading...",
       online: "Online",
       offline: "Offline",
+    },
+
+    footer: {
+      tagline: "Secure, autonomous AI for modern e-commerce growth.",
+      explore: "Explore",
+      copyright: "© 2026 Digital FTE. All rights reserved.",
+      description: "Empowering 24/7 E-Commerce growth with secure, autonomous AI employee containers.",
+    },
+
+    robot: {
+      orbit: {
+        inventory: "Inventory",
+        social: "Social Media",
+        reply: "Auto Reply",
+        images: "AI Images",
+        analytics: "Analytics",
+      },
+      messages: {
+        welcome: "Welcome! Let's grow your store together! 👋",
+        email: "I see your email! 👀",
+        visible: "Oh, visible! 🙈",
+        security: "Security first! 🔒",
+        name: "Awesome name! ✨",
+      },
+    },
+
+    activation: {
+      engine: "AI Initialization Engine",
+      workspace: "Preparing your autonomous workspace",
+      ready: "ready",
+      logs: {
+        neural: "Connecting neural pathways...",
+        sync: "Syncing autonomous decision engine...",
+        creative: "Optimizing creative response loops...",
+        signals: "Stabilizing real-time commerce signals...",
+        inventory: "Aligning inventory intelligence...",
+        launch: "Preparing launch sequence...",
+      },
+      badges: {
+        neural: "Neural AI Core",
+        autopilot: "Auto-Pilot Engine",
+        guard: "Autonomous Guard",
+        activated: "Activated",
+        engaged: "Engaged",
+        online: "Online",
+      },
+      completeTitle: "Welcome to your Autonomous Dashboard",
+      completeDesc: "The launch sequence is complete. Redirecting you to your command center.",
     },
   },
 
@@ -491,6 +553,7 @@ export const translations = {
       howItWorks: "یہ کیسے کام کرتا ہے",
       pricing: "قیمتیں",
       about: "ہمارے بارے میں",
+      contact: "رابطہ کریں",
       english: "English",
       urdu: "اردو (Urdu)",
       selectLanguage: "زبان",
@@ -522,6 +585,13 @@ export const translations = {
         "ملازمین رکھنا بند کریں۔ خودکاری شروع کریں۔ ایک AI ایجنٹ آپ کا پورا ای کامرس آپریشن سنبھالتا ہے — انوینٹری سے سوشل میڈیا تک کسٹمر سپورٹ تک۔",
       ctaPrimary: "مفت ٹرائل شروع کریں",
       ctaSecondary: "دیکھیں یہ کیسے کام کرتا ہے",
+      benefitFast: "تیز اور محفوظ",
+      benefitFastDesc: "محفوظ آن بورڈنگ کے ساتھ جلدی سیٹ اپ کریں۔",
+      benefitNoCard: "کریڈٹ کارڈ کی ضرورت نہیں",
+      benefitNoCardDesc: "ادائیگی سے پہلے AI ورک فلو کو بغیر خطرے کے آزمائیں۔",
+      benefitCancel: "کسی بھی وقت منسوخ کریں",
+      benefitCancelDesc: "بغیر کسی پابندی کے اپنے پلان کا کنٹرول رکھیں۔",
+      demoLabel: "ڈیمو دیکھیں",
       trustLine: "500+ اسٹور مالکان کا اعتماد • کوئی کریڈٹ کارڈ ضروری نہیں",
     },
 
@@ -708,6 +778,8 @@ export const translations = {
       logOut: "لاگ آؤٹ",
       signIn: "سائن ان کریں",
       signUp: "اکاؤنٹ بنائیں",
+      loginDesc: "اپنی خودمختار ای کامرس ورک فورس کو کنٹرول کرنے کے لیے لاگ ان کریں۔",
+      signupDesc: "کریڈٹ کارڈ کی ضرورت نہیں۔ اپنا پہلا AI ملازم فوراً تعینات کریں۔",
       emailLabel: "ای میل ایڈریس",
       emailPlaceholder: "آپ@مثال.com",
       passwordLabel: "پاس ورڈ",
@@ -860,7 +932,7 @@ export const translations = {
       step1: {
         greeting: "ہیلو",
         headline: "ڈیجیٹل FTE میں خوش آمدید",
-        sub: "آپ کا AI ملازم لانچ کرنے کے لیے سات رہنما ترتیب مراحل سے گزریں۔",
+        sub: "آپ کا AI ملازم لانچ کرنے کے لیے چھ رہنما ترتیب مراحل سے گزریں۔",
         connectStore: "اسٹور کنیکٹ کریں",
         connectSocial: "سوشل کنیکٹ کریں",
         readyLabel: "تیار!",
@@ -911,6 +983,8 @@ export const translations = {
         title: "سوشل چینلز کنیکٹ کریں",
         desc: "خودمختار AI سوشل پوسٹنگ اور مشغولیت فعال کریں",
         oauthLabel: "OAuth 2.0 انکرپٹڈ",
+        connect: "کنیکٹ کریں",
+        disconnect: "منقطع کریں",
         reachTitle: "متوقع سوشل رسائی اثر",
         reachDesc: "~45,000+ ممکنہ آرگینک سامعین امپریشنز / ماہ",
         aiAutomated: "AI خودکار",
@@ -929,6 +1003,7 @@ export const translations = {
         launchBtn: "🚀 ڈیجیٹل FTE لانچ کریں",
         backBtn: "← واپس",
         launching: "لانچ ہو رہا ہے...",
+        robotMsg: "تمام سسٹم تیار ہیں! میں مکمل تربیت یافتہ ہوں اور آپ کا اسٹور سنبھالنے کے لیے تیار ہوں۔ لانچ کریں! 🚀",
       },
       step7: {
         title: "آپ کا AI ایکٹیویٹ ہو رہا ہے!",
@@ -945,6 +1020,7 @@ export const translations = {
     },
 
     common: {
+      step: "مرحلہ",
       back: "← واپس",
       next: "اگلا",
       save: "محفوظ کریں",
@@ -952,6 +1028,54 @@ export const translations = {
       loading: "لوڈ ہو رہا ہے...",
       online: "آن لائن",
       offline: "آف لائن",
+    },
+
+    footer: {
+      tagline: "جدید ای کامرس کی ترقی کے لیے محفوظ، خودمختار AI۔",
+      explore: "دریافت کریں",
+      copyright: "© 2026 ڈیجیٹل FTE۔ جملہ حقوق محفوظ ہیں۔",
+      description: "محفوظ اور خودمختار AI ملازمین کے ذریعے 24/7 ای کامرس ترقی کو بااختیار بنانا۔",
+    },
+
+    robot: {
+      orbit: {
+        inventory: "انوینٹری",
+        social: "سوشل میڈیا",
+        reply: "خودکار جواب",
+        images: "AI تصاویر",
+        analytics: "تجزیات",
+      },
+      messages: {
+        welcome: "خوش آمدید! آئیے مل کر آپ کے اسٹور کو ترقی دیں! 👋",
+        email: "مجھے آپ کی ای میل نظر آ رہی ہے! 👀",
+        visible: "اوہ، پاس ورڈ نظر آ رہا ہے! 🙈",
+        security: "سیکیورٹی پہلے! 🔒",
+        name: "بہت خوبصورت نام! ✨",
+      },
+    },
+
+    activation: {
+      engine: "AI ایکٹیویشن انجن",
+      workspace: "آپ کی خودمختار ورک اسپیس تیار ہو رہی ہے",
+      ready: "تیار",
+      logs: {
+        neural: "نیورل پاتھ ویز کنیکٹ ہو رہے ہیں...",
+        sync: "خودمختار فیصلہ سازی انجن سنک ہو رہا ہے...",
+        creative: "تخلیقی رسپانس لوپس بہتر بنائے جا رہے ہیں...",
+        signals: "ریئل ٹائم کامرس سگنلز مستحکم کیے جا رہے ہیں...",
+        inventory: "انوینٹری انٹیلیجنس کو منسلک کیا جا رہا ہے...",
+        launch: "لانچ سیکوئنس تیار ہو رہا ہے...",
+      },
+      badges: {
+        neural: "نیورل AI کور",
+        autopilot: "آٹو پائلٹ انجن",
+        guard: "خودمختار گارڈ",
+        activated: "فعال",
+        engaged: "مربوط",
+        online: "آن لائن",
+      },
+      completeTitle: "آپ کے خودمختار ڈیش بورڈ میں خوش آمدید",
+      completeDesc: "لانچ سیکوئنس مکمل ہو گیا ہے۔ آپ کو کمانڈ سینٹر پر بھیجا جا رہا ہے۔",
     },
   },
 };

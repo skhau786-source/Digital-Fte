@@ -1,26 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { translations } from "./translations";
 
 type Language = "en" | "ur";
-
-// Translations mapping strictly for site keys
-const dictionary: Record<Language, Record<string, string>> = {
-  en: {
-    "nav.home": "Home",
-    "nav.features": "Features",
-    "nav.howItWorks": "How It Works",
-    "nav.pricing": "Pricing",
-    "nav.about": "About",
-  },
-  ur: {
-    "nav.home": "ہوم",
-    "nav.features": "خصوصیات",
-    "nav.howItWorks": "طریقہ کار",
-    "nav.pricing": "قیمت",
-    "nav.about": "ہمارے بارے میں",
-  },
-};
 
 interface LanguageContextType {
   language: Language;
@@ -46,6 +29,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ur" ? "rtl" : "ltr";
+  }, [language]);
+
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem("app_lang", lang);
@@ -54,7 +42,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const closeLanguageModal = () => setShowLanguageModal(false);
 
   const t = (key: string): string => {
-    return dictionary[language]?.[key] || key;
+    const value = key.split(".").reduce<unknown>((current, part) => {
+      if (typeof current !== "object" || current === null) return undefined;
+      return (current as Record<string, unknown>)[part];
+    }, translations[language]);
+
+    return typeof value === "string" ? value : key;
   };
 
   return (

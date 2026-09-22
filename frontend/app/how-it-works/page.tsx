@@ -5,6 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { SiteNav } from "../components/SiteNav";
 import { InteractiveRobot } from "../components/InteractiveRobot";
+import { Footer } from "../components/Footer";
+import { useLanguage } from "../lib/LanguageContext";
 import {
   Store,
   Share2,
@@ -22,6 +24,7 @@ import {
 
 const steps = [
   {
+    key: "s1",
     step: "01",
     title: "Connect Your Store",
     desc: "Link your Shopify or e-commerce website securely so the AI can sync products, inventory, and orders.",
@@ -30,6 +33,7 @@ const steps = [
     previewText: "Shopify API Connected • 2,410 SKUs Processed",
   },
   {
+    key: "s2",
     step: "02",
     title: "Connect Social Channels",
     desc: "Authorize Instagram, Facebook, TikTok, YouTube, and Twitter to let the AI publish posts and reply to comments.",
@@ -38,6 +42,7 @@ const steps = [
     previewText: "Meta & TikTok Tokens Granted • Auto-Reply Active",
   },
   {
+    key: "s3",
     step: "03",
     title: "Train Your AI Roles",
     desc: "Choose the roles your Digital FTE should perform: inventory, support, content, analytics, and automation.",
@@ -46,6 +51,7 @@ const steps = [
     previewText: "Roles: Support (Agent #1), Inventory (Agent #2)",
   },
   {
+    key: "s4",
     step: "04",
     title: "Activate Auto Posting",
     desc: "Set daily social posting cadence and auto-reply rules for comment management.",
@@ -54,6 +60,7 @@ const steps = [
     previewText: "Posting Schedule: 2x Daily • Sentiment Filter Active",
   },
   {
+    key: "s5",
     step: "05",
     title: "Review Revenue Signals",
     desc: "Monitor revenue, orders and inventory health from the same AI dashboard.",
@@ -62,6 +69,7 @@ const steps = [
     previewText: "Live P&L Stream Connected • 99.4% Forecast Accuracy",
   },
   {
+    key: "s6",
     step: "06",
     title: "Launch the Agent",
     desc: "Deploy your AI employee and let it start working 24/7 on your store and social campaigns.",
@@ -70,6 +78,7 @@ const steps = [
     previewText: "Agent Online • Avg Response Time: 0.8s",
   },
   {
+    key: "s7",
     step: "07",
     title: "Grow with AI",
     desc: "Scale faster with fewer mistakes, better engagement, and automated store operations.",
@@ -90,6 +99,7 @@ const container: Variants = {
 };
 
 export default function HowItWorksPage() {
+  const { t } = useLanguage();
   const [activeStepIndex, setActiveStepIndex] = useState(0);
 
   return (
@@ -139,16 +149,16 @@ export default function HowItWorksPage() {
             className="text-xs font-bold text-amber-300 tracking-widest uppercase bg-amber-500/10 border border-amber-500/20 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full cursor-default"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            Seamless Onboarding Protocol
+            {t("howItWorks.badge")}
           </motion.p>
           <motion.h2 variants={fadeUp} className="mt-6 text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Launch your AI employee in <br className="hidden sm:block" />
+            {t("howItWorks.headline1")} <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
-              seven simple steps
+              {t("howItWorks.headline2")}
             </span>
           </motion.h2>
           <motion.p variants={fadeUp} className="mt-5 text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Digital FTE is designed so store owners can connect once, configure quickly, and start automating inventory, content, customer replies, and revenue growth.
+            {t("howItWorks.sub")}
           </motion.p>
         </motion.section>
 
@@ -195,18 +205,18 @@ export default function HowItWorksPage() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest">
-                          STEP {item.step}
+                          {t("common.step")} {item.step}
                         </span>
                         <span className="text-[10px] font-bold text-amber-300/80 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
-                          {item.badge}
+                          {t(`howItWorks.steps.${item.key}.badge`)}
                         </span>
                       </div>
 
                       <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">
-                        {item.title}
+                        {t(`howItWorks.steps.${item.key}.title`)}
                       </h3>
                       <p className="mt-2 text-sm text-slate-400 leading-relaxed">
-                        {item.desc}
+                        {t(`howItWorks.steps.${item.key}.desc`)}
                       </p>
                     </div>
                   </div>
@@ -227,7 +237,7 @@ export default function HowItWorksPage() {
                 <div className="flex items-center gap-2">
                   <Bot className="w-5 h-5 text-amber-400" />
                   <span className="text-xs font-bold text-white tracking-wider uppercase">
-                    Step Output Monitor
+                    {t("howItWorks.stepMonitor")}
                   </span>
                 </div>
                 <span className="relative flex h-2.5 w-2.5">
@@ -248,27 +258,27 @@ export default function HowItWorksPage() {
                   <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-center gap-3">
                     <Activity className="w-5 h-5 text-amber-400 animate-pulse shrink-0" />
                     <p className="text-xs font-mono text-amber-200">
-                      {steps[activeStepIndex].previewText}
+                      {t(`howItWorks.steps.${steps[activeStepIndex].key}.preview`)}
                     </p>
                   </div>
 
                   <div>
                     <h4 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2">
-                      Active Execution Stage
+                      {t("howItWorks.activeStage")}
                     </h4>
                     <p className="text-xl font-extrabold text-white">
-                      {steps[activeStepIndex].title}
+                      {t(`howItWorks.steps.${steps[activeStepIndex].key}.title`)}
                     </p>
                     <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                      {steps[activeStepIndex].desc}
+                      {t(`howItWorks.steps.${steps[activeStepIndex].key}.desc`)}
                     </p>
                   </div>
 
                   <div className="pt-4 border-t border-white/5 space-y-2">
                     <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span>Automated Config</span>
+                      <span>{t("howItWorks.automatedConfig")}</span>
                       <span className="text-emerald-400 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Ready
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {t("howItWorks.ready")}
                       </span>
                     </div>
                     <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
@@ -295,10 +305,10 @@ export default function HowItWorksPage() {
           className="mt-24 rounded-3xl border border-white/10 bg-gradient-to-br from-[#06111d] to-[#0a1626] p-8 sm:p-12 shadow-2xl text-center relative overflow-hidden"
         >
           <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
-            Ready to automate your store?
+            {t("howItWorks.ctaHeadline")}
           </h3>
           <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            The workflow is built for e-commerce businesses that want a simple AI setup and a fast route to autonomous operations.
+            {t("howItWorks.ctaDesc")}
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -306,14 +316,14 @@ export default function HowItWorksPage() {
               href="/pricing"
               className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-8 py-3.5 text-sm font-bold text-[#06111b] hover:bg-amber-300 transition-colors shadow-lg shadow-amber-500/10"
             >
-              <span>View Pricing Plans</span>
+              <span>{t("howItWorks.ctaBtn")}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/"
               className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-8 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-colors"
             >
-              Back to Home
+              {t("howItWorks.backBtn")}
             </Link>
           </div>
         </motion.div>
@@ -323,6 +333,7 @@ export default function HowItWorksPage() {
           <InteractiveRobot isEmailFocused={false} isPasswordFocused={false} isPasswordVisible={false} />
         </div>
       </main>
+      <Footer />
     </div>
   );
 } 

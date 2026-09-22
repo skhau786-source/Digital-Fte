@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { SiteNav } from "../components/SiteNav";
+import { Footer } from "../components/Footer";
+import { useLanguage } from "../lib/LanguageContext";
 import {
   CheckCircle2,
   Zap,
@@ -15,37 +17,28 @@ import {
 } from "lucide-react";
 
 const freeTrialFeatures = [
-  "Autonomous inventory management",
-  "Revenue tracking and analytics",
-  "Caption + image generation",
-  "Social media posting (1-2 posts/day)",
-  "Chatbot integrated support",
-  "Comments dashboard view",
-  "Auto social media replies",
+  "f1",
+  "f2",
+  "f3",
+  "f4",
+  "f5",
+  "f6",
+  "f7",
 ];
 
 const proFeatures = [
-  { title: "Inventory Automation", desc: "Auto-sync stock & catalog updates in real-time." },
-  { title: "Revenue Intelligence", desc: "Live performance & forecast metrics." },
-  { title: "AI Content Engine", desc: "Instant product captions & 4K image renders." },
-  { title: "Multi-Channel Social", desc: "1-2 daily posts scheduled automatically." },
-  { title: "Auto-Reply & Moderation", desc: "Instant chatbot & comment resolution." },
-  { title: "@all Community Broadcast", desc: "Mass engagement notifications." },
+  "f1",
+  "f2",
+  "f3",
+  "f4",
+  "f5",
+  "f6",
 ];
 
 const faqs = [
-  {
-    q: "Do I need a credit card for the 7-day trial?",
-    a: "No! You can sign up, connect your store, and test all AI features completely free for 7 days without entering credit card details.",
-  },
-  {
-    q: "Can I cancel my subscription anytime?",
-    a: "Yes, you can pause or cancel your subscription at any time directly from your dashboard setting with one click.",
-  },
-  {
-    q: "How many e-commerce stores can I connect?",
-    a: "The standard plan includes 1 store connection. If you manage multiple stores, you can add extra store seats from your billing panel.",
-  },
+  { q: "q1", a: "a1" },
+  { q: "q2", a: "a2" },
+  { q: "q3", a: "a3" },
 ];
 
 const fadeUp: Variants = {
@@ -59,6 +52,7 @@ const container: Variants = {
 };
 
 export default function PricingPage() {
+  const { t } = useLanguage();
   const [isYearly, setIsYearly] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -108,16 +102,16 @@ export default function PricingPage() {
             className="text-xs font-bold text-amber-300 tracking-widest uppercase bg-amber-500/10 border border-amber-500/20 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full cursor-default"
           >
             <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            Transparent Pricing Structure
+            {t("pricing.badge")}
           </motion.p>
           <motion.h2 variants={fadeUp} className="mt-6 text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Simple pricing for your <br className="hidden sm:block" />
+            {t("pricing.headline1")} <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
-              AI e-commerce team
+              {t("pricing.headline2")}
             </span>
           </motion.h2>
           <motion.p variants={fadeUp} className="mt-4 text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Start with a 7-day free trial, then keep your AI employee running with advanced inventory, content, and engagement automation.
+            {t("pricing.sub")}
           </motion.p>
 
           {/* Billing Cycle Toggle */}
@@ -128,7 +122,7 @@ export default function PricingPage() {
                 !isYearly ? "bg-amber-400 text-[#06111b] shadow-md" : "text-slate-400 hover:text-white"
               }`}
             >
-              Monthly
+              {t("pricing.monthly")}
             </button>
             <button
               onClick={() => setIsYearly(true)}
@@ -136,9 +130,9 @@ export default function PricingPage() {
                 isYearly ? "bg-amber-400 text-[#06111b] shadow-md" : "text-slate-400 hover:text-white"
               }`}
             >
-              Yearly
+              {t("pricing.yearly")}
               <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
-                Save 20%
+                {t("pricing.save20")}
               </span>
             </button>
           </motion.div>
@@ -160,21 +154,21 @@ export default function PricingPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
-                  7-DAY FREE TRIAL
+                  {t("pricing.trialBadge")}
                 </span>
                 <ShieldCheck className="w-5 h-5 text-slate-400" />
               </div>
 
-              <h3 className="text-3xl font-extrabold text-white">Free</h3>
+              <h3 className="text-3xl font-extrabold text-white">{t("pricing.trialTitle")}</h3>
               <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Experience full automation with zero risk. No credit card required.
+                {t("pricing.trialDesc")}
               </p>
 
               <div className="mt-8 space-y-3.5 border-t border-white/5 pt-6">
                 {freeTrialFeatures.map((item, index) => (
                   <div key={index} className="text-xs sm:text-sm text-slate-300 flex items-center gap-3">
                     <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span>{item}</span>
+                    <span>{t(`pricing.trialFeatures.${item}`)}</span>
                   </div>
                 ))}
               </div>
@@ -185,7 +179,7 @@ export default function PricingPage() {
                 href="/login"
                 className="inline-flex items-center justify-center w-full rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-colors"
               >
-                Start Free Trial Now
+                {t("pricing.trialBtn")}
               </Link>
             </div>
           </motion.div>
@@ -197,14 +191,14 @@ export default function PricingPage() {
           >
             {/* Ribbon Badge */}
             <div className="absolute top-0 right-0 bg-amber-400 text-[#06111b] font-extrabold text-[10px] tracking-widest uppercase px-4 py-1.5 rounded-bl-2xl">
-              MOST POPULAR
+              {t("pricing.mostPopular")}
             </div>
 
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <span className="text-xs font-bold uppercase tracking-widest text-amber-300">
-                  FULL AI EMPLOYEE
+                  {t("pricing.proBadge")}
                 </span>
               </div>
 
@@ -212,10 +206,10 @@ export default function PricingPage() {
                 <h3 className="text-4xl sm:text-5xl font-extrabold text-white">
                   {isYearly ? "$32" : "$40"}
                 </h3>
-                <span className="text-sm font-bold text-slate-400">/ month</span>
+                <span className="text-sm font-bold text-slate-400">{t("pricing.proPerMonth")}</span>
               </div>
               <p className="mt-2 text-xs text-amber-200/80">
-                {isYearly ? "Billed annually ($384/yr)" : "Billed monthly after 7-day trial"}
+                {isYearly ? t("pricing.proBilledYearly") : t("pricing.proBilledMonthly")}
               </p>
 
               <div className="mt-8 space-y-3.5 border-t border-white/10 pt-6">
@@ -223,8 +217,8 @@ export default function PricingPage() {
                   <div key={idx} className="rounded-2xl bg-white/5 border border-white/5 p-3 flex items-start gap-3">
                     <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-bold text-white">{feat.title}</p>
-                      <p className="text-[11px] text-slate-400">{feat.desc}</p>
+                      <p className="text-xs font-bold text-white">{t(`pricing.proFeatures.${feat}.title`)}</p>
+                      <p className="text-[11px] text-slate-400">{t(`pricing.proFeatures.${feat}.desc`)}</p>
                     </div>
                   </div>
                 ))}
@@ -236,7 +230,7 @@ export default function PricingPage() {
                 href="/login"
                 className="inline-flex items-center justify-center gap-2 w-full rounded-full bg-amber-400 px-6 py-3.5 text-sm font-bold text-[#06111b] hover:bg-amber-300 transition-colors shadow-lg shadow-amber-500/20"
               >
-                <span>Get Started Now</span>
+                <span>{t("pricing.proBtn")}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -253,7 +247,7 @@ export default function PricingPage() {
         >
           <div className="text-center mb-10">
             <HelpCircle className="w-8 h-8 text-amber-400 mx-auto mb-3" />
-            <h3 className="text-2xl font-extrabold text-white">Frequently Asked Questions</h3>
+            <h3 className="text-2xl font-extrabold text-white">{t("pricing.faqTitle")}</h3>
           </div>
 
           <div className="space-y-4">
@@ -266,7 +260,7 @@ export default function PricingPage() {
                   className="rounded-2xl border border-white/10 bg-[#071121]/90 backdrop-blur-xl p-5 cursor-pointer transition-colors hover:border-amber-500/30"
                 >
                   <div className="flex items-center justify-between gap-4">
-                    <h4 className="text-sm font-bold text-white">{faq.q}</h4>
+                    <h4 className="text-sm font-bold text-white">{t(`pricing.faqs.${faq.q}`)}</h4>
                     <ChevronDown
                       className={`w-4 h-4 text-amber-400 transition-transform duration-300 ${
                         isOpen ? "rotate-180" : ""
@@ -282,7 +276,7 @@ export default function PricingPage() {
                         transition={{ duration: 0.2 }}
                         className="mt-3 text-xs text-slate-400 leading-relaxed border-t border-white/5 pt-3"
                       >
-                        {faq.a}
+                        {t(`pricing.faqs.${faq.a}`)}
                       </motion.p>
                     )}
                   </AnimatePresence>
@@ -292,6 +286,7 @@ export default function PricingPage() {
           </div>
         </motion.div>
       </main>
+      <Footer />
     </div>
   );
 }

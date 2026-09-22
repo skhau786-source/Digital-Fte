@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { InteractiveRobot } from "../InteractiveRobot";
+import { useLanguage } from "../../lib/LanguageContext";
 
 type ScreenStatus = "charging" | "pulse" | "explosion" | "warp";
 
@@ -11,27 +12,26 @@ interface LaunchActivationScreenProps {
   onComplete?: () => void;
 }
 
-const STATUS_LOGS = [
-  "Connecting neural pathways...",
-  "Syncing autonomous decision engine...",
-  "Optimizing creative response loops...",
-  "Stabilizing real-time commerce signals...",
-  "Aligning inventory intelligence...",
-  "Preparing launch sequence...",
-];
-
-const BADGES = [
-  { title: "Neural AI Core", subtitle: "Activated", icon: <Zap className="w-4 h-4" /> },
-  { title: "Auto-Pilot Engine", subtitle: "Engaged", icon: <Sparkles className="w-4 h-4" /> },
-  { title: "Autonomous Guard", subtitle: "Online", icon: <ShieldCheck className="w-4 h-4" /> },
-];
-
 const CHARGING_DURATION = 7000;
 const PULSE_DURATION = 2500;
 const EXPLOSION_DURATION = 1800;
 const WARP_DURATION = 1200;
 
 export function LaunchActivationScreen({ onComplete }: LaunchActivationScreenProps) {
+  const { t } = useLanguage();
+  const statusLogs = [
+    t("activation.logs.neural"),
+    t("activation.logs.sync"),
+    t("activation.logs.creative"),
+    t("activation.logs.signals"),
+    t("activation.logs.inventory"),
+    t("activation.logs.launch"),
+  ];
+  const badges = [
+    { title: t("activation.badges.neural"), subtitle: t("activation.badges.activated"), icon: <Zap className="w-4 h-4" /> },
+    { title: t("activation.badges.autopilot"), subtitle: t("activation.badges.engaged"), icon: <Sparkles className="w-4 h-4" /> },
+    { title: t("activation.badges.guard"), subtitle: t("activation.badges.online"), icon: <ShieldCheck className="w-4 h-4" /> },
+  ];
   const [status, setStatus] = useState<ScreenStatus>("charging");
   const [logIndex, setLogIndex] = useState(0);
   const [badgeIndex, setBadgeIndex] = useState(0);
@@ -41,13 +41,13 @@ export function LaunchActivationScreen({ onComplete }: LaunchActivationScreenPro
     if (status !== "charging") return;
 
     const interval = window.setInterval(() => {
-      setLogIndex((prev) => (prev + 1) % STATUS_LOGS.length);
-      setBadgeIndex((prev) => (prev + 1) % BADGES.length);
+      setLogIndex((prev) => (prev + 1) % statusLogs.length);
+      setBadgeIndex((prev) => (prev + 1) % badges.length);
       setReadyPercent((prev) => Math.min(100, prev + 16));
     }, 700);
 
     return () => window.clearInterval(interval);
-  }, [status]);
+  }, [badges.length, status, statusLogs.length]);
 
   useEffect(() => {
     if (status === "charging") {
@@ -168,9 +168,9 @@ export function LaunchActivationScreen({ onComplete }: LaunchActivationScreenPro
             >
               <div className="mb-2 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.3em] text-amber-200">
                 <Sparkles className="w-3.5 h-3.5" />
-                AI initialization engine
+                {t("activation.engine")}
               </div>
-              <p className="text-sm font-semibold text-slate-100">{STATUS_LOGS[logIndex]}</p>
+              <p className="text-sm font-semibold text-slate-100">{statusLogs[logIndex]}</p>
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
                 <motion.div
                   className="h-full rounded-full bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-500"
@@ -178,7 +178,7 @@ export function LaunchActivationScreen({ onComplete }: LaunchActivationScreenPro
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 />
               </div>
-              <p className="mt-2 text-[11px] text-slate-300">Preparing your autonomous workspace • {percent}% ready</p>
+              <p className="mt-2 text-[11px] text-slate-300">{t("activation.workspace")} • {percent}% {t("activation.ready")}</p>
             </motion.div>
 
             {/* ROW 3 — badges, own grid row, guaranteed below the status card */}
@@ -188,7 +188,7 @@ export function LaunchActivationScreen({ onComplete }: LaunchActivationScreenPro
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              {BADGES.map((badge, index) => {
+              {badges.map((badge, index) => {
                 const isActive = index === badgeIndex;
                 return (
                   <motion.div
@@ -248,8 +248,8 @@ export function LaunchActivationScreen({ onComplete }: LaunchActivationScreenPro
                   <CheckCircle2 className="h-8 w-8" />
                 </div>
               </div>
-              <p className="text-lg font-black text-white">Welcome to your Autonomous Dashboard</p>
-              <p className="mt-2 text-sm text-slate-300">The launch sequence is complete. Redirecting you to your command center.</p>
+              <p className="text-lg font-black text-white">{t("activation.completeTitle")}</p>
+              <p className="mt-2 text-sm text-slate-300">{t("activation.completeDesc")}</p>
             </motion.div>
           </motion.div>
         )}

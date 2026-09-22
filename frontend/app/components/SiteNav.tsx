@@ -19,6 +19,7 @@ export function SiteNav() {
     { href: "/how-it-works", labelKey: "nav.howItWorks" },
     { href: "/pricing", labelKey: "nav.pricing" },
     { href: "/about", labelKey: "nav.about" },
+    { href: "/contact", labelKey: "nav.contact" },
   ];
 
   // Close dropdown on outside click

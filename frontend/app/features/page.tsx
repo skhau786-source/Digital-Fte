@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { SiteNav } from "../components/SiteNav";
+import { Footer } from "../components/Footer";
+import { useLanguage } from "../lib/LanguageContext";
 import {
   Package,
   LineChart,
@@ -23,6 +25,7 @@ const categories = ["All", "Operations", "Marketing", "Engagement"];
 
 const features = [
   {
+    key: "inventory",
     title: "Inventory Management",
     category: "Operations",
     desc: "Manage stock, sync catalogs, and automate replenishment checks in real time.",
@@ -31,6 +34,7 @@ const features = [
     preview: "Real-time stock sync active",
   },
   {
+    key: "revenue",
     title: "Revenue Dashboard",
     category: "Operations",
     desc: "See your sales, order volume, and revenue trends without manual reporting.",
@@ -39,6 +43,7 @@ const features = [
     preview: "Automated daily P&L reports",
   },
   {
+    key: "caption",
     title: "Caption Generation",
     category: "Marketing",
     desc: "Create social captions, product descriptions and ad copy instantly.",
@@ -47,6 +52,7 @@ const features = [
     preview: "AI copy crafted in 2 seconds",
   },
   {
+    key: "social",
     title: "Social Posting",
     category: "Marketing",
     desc: "Publish 1-2 high-quality social posts per day across your connected channels.",
@@ -55,6 +61,7 @@ const features = [
     preview: "Auto-scheduled post queues",
   },
   {
+    key: "image",
     title: "Image Generation",
     category: "Marketing",
     desc: "Generate product and lifestyle images using AI guidance for better engagement.",
@@ -63,6 +70,7 @@ const features = [
     preview: "4K lifestyle render engine",
   },
   {
+    key: "chatbot",
     title: "Chatbot Integration",
     category: "Engagement",
     desc: "Handle customer messages and auto-reply to comments from one dashboard.",
@@ -71,6 +79,7 @@ const features = [
     preview: "Instant order lookup AI",
   },
   {
+    key: "comments",
     title: "Comment Insights",
     category: "Engagement",
     desc: "Show comments in a dashboard and reply automatically to keep conversations moving.",
@@ -79,6 +88,7 @@ const features = [
     preview: "Sentiment filtering engine",
   },
   {
+    key: "atAll",
     title: "@all Support",
     category: "Engagement",
     desc: "Trigger broad social engagement commands and manage audience interactions faster.",
@@ -101,6 +111,7 @@ const container: Variants = {
 };
 
 export default function FeaturesPage() {
+  const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState("All");
 
   const filteredFeatures =
@@ -155,15 +166,13 @@ export default function FeaturesPage() {
             className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-300 sm:px-3.5 sm:text-xs"
           >
             <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            Autonomous Platform Capabilities
+            {t("features.badge")}
           </motion.p>
           <motion.h2 variants={fadeUp} className="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-white sm:mt-6 sm:text-5xl">
-            AI features built for modern
-            <br className="hidden sm:block" /> e-commerce teams
+            {t("features.headline")}
           </motion.h2>
           <motion.p variants={fadeUp} className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-400 sm:mt-5 sm:text-base">
-            Digital FTE brings inventory automation, social media content, revenue insights,
-            chatbot replies and comment management together in one AI-powered employee.
+            {t("features.sub")}
           </motion.p>
         </motion.section>
 
@@ -190,7 +199,7 @@ export default function FeaturesPage() {
                   />
                 )}
                 <span className={`relative z-10 ${isActive ? "text-[#06111b]" : "text-slate-400"}`}>
-                  {cat}
+                  {t(`features.categories.${cat === "All" ? "all" : cat.toLowerCase()}`)}
                 </span>
               </button>
             );
@@ -228,12 +237,12 @@ export default function FeaturesPage() {
 
                       <span className="flex max-w-[62%] items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-right text-[9px] font-bold text-amber-300 sm:px-2.5 sm:text-[10px]">
                         <Clock className="w-3 h-3 text-amber-400" />
-                        {feature.badge}
+                        {t(`features.items.${feature.key}.badge`)}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-sm leading-relaxed text-slate-400">{feature.desc}</p>
+                    <h3 className="text-lg font-bold text-white mb-2">{t(`features.items.${feature.key}.title`)}</h3>
+                    <p className="text-sm text-slate-400 leading-relaxed">{t(`features.items.${feature.key}.desc`)}</p>
                   </div>
 
                   {/* Status Indicator */}
@@ -242,7 +251,7 @@ export default function FeaturesPage() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                     </span>
-                    <span>{feature.preview}</span>
+                    <span>{t(`features.items.${feature.key}.preview`)}</span>
                   </div>
                 </motion.div>
               );
@@ -258,11 +267,10 @@ export default function FeaturesPage() {
           transition={{ duration: 0.6 }}
           className="relative mt-16 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#06111d] to-[#0a1626] p-5 shadow-2xl sm:mt-20 sm:p-10"
         >
-          <span className="text-[11px] font-bold text-amber-400 tracking-widest uppercase">Value Proposition</span>
-          <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white">Why this matters for your store</h3>
+           <span className="text-[11px] font-bold text-amber-400 tracking-widest uppercase">{t("features.valueTitle")}</span>
+           <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white">{t("features.whyMatters")}</h3>
           <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed max-w-3xl">
-            Your store gets an autonomous AI employee that reduces manual work, keeps inventory
-            accurate, engages customers, and builds revenue with social media workflow automation.
+             {t("features.whyDesc")}
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -275,7 +283,7 @@ export default function FeaturesPage() {
             >
               <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <p className="text-sm text-slate-300 leading-relaxed">
-                Automate daily e-commerce operations and free your team to focus on high-impact growth strategies.
+                 {t("features.bullet1")}
               </p>
             </motion.div>
 
@@ -288,7 +296,7 @@ export default function FeaturesPage() {
             >
               <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <p className="text-sm text-slate-300 leading-relaxed">
-                Consolidate social media, inventory checks, chatbot replies, and revenue reporting into one single AI system.
+                 {t("features.bullet2")}
               </p>
             </motion.div>
           </div>
@@ -306,11 +314,12 @@ export default function FeaturesPage() {
             href="/pricing"
             className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-8 py-3.5 text-sm font-bold text-[#06111b] hover:bg-amber-300 transition-colors shadow-lg shadow-amber-500/10"
           >
-            <span>View Pricing Plans</span>
+             <span>{t("features.ctaBtn")}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
       </main>
+      <Footer />
     </div>
   );
 }

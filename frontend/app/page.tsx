@@ -38,11 +38,19 @@ import {
   BarChart3,
   DollarSign,
   Bell,
+  Bot,
+  Play,
+  Cpu,
+  HelpCircle,
+  ChevronDown,
+  Star,
 } from "lucide-react";
 import { InteractiveRobot } from "./components/InteractiveRobot";
 import { LaunchActivationScreen } from "./components/onboarding/LaunchActivationScreen";
 import { SiteNav } from "./components/SiteNav";
+import { Footer } from "./components/Footer";
 import { buildApiUrl } from "./lib/config";
+import { useLanguage } from "./lib/LanguageContext";
 
 // --- MOCK DATA ---
 const MOCK_PRODUCTS = [
@@ -54,10 +62,11 @@ const MOCK_PRODUCTS = [
   { id: 6, name: "Canvas Backpack", price: 74.99, stock: 34, status: "In Stock" },
 ];
 
-const TOTAL_ONBOARDING_STEPS = 7;
+const TOTAL_ONBOARDING_STEPS = 6;
 
 // --- MAIN AUTH PAGE COMPONENT ---
 export default function AuthPage() {
+  const { t } = useLanguage();
   const [currentView, setCurrentView] = useState<"landing" | "auth">("landing");
   const [robotMotionPaused, setRobotMotionPaused] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
@@ -113,6 +122,14 @@ export default function AuthPage() {
 
   // Global SEO States
   const [showSEOModal, setShowSEOModal] = useState(false);
+
+  // LANDING PAGE INTERACTIVE SIMULATION & FAQ STATES
+  const [simActiveTab, setSimActiveTab] = useState<"inventory" | "content" | "support">("inventory");
+  const [simStockTriggered, setSimStockTriggered] = useState(false);
+  const [simContentGenerating, setSimContentGenerating] = useState(false);
+  const [simGeneratedPost, setSimGeneratedPost] = useState(false);
+  const [simChatLanguage, setSimChatLanguage] = useState<"en" | "ur">("en");
+  const [landingFaqOpen, setLandingFaqOpen] = useState<number | null>(null);
 
   // ONBOARDING FLOW STATES
   const [onboardingStep, setOnboardingStep] = useState(1);
@@ -237,14 +254,6 @@ export default function AuthPage() {
   const normalizeUserEmail = (value?: string | null) => {
     const trimmedValue = value?.trim();
     return trimmedValue || "user@example.com";
-  };
-
-  // Time-based greeting for onboarding welcome screen
-  const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
   };
 
   // Extract a friendly display name from the user's email
@@ -535,7 +544,7 @@ export default function AuthPage() {
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-[#0f1f3f]/90 text-white border border-white/10 hover:bg-[#162a57]/95 transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Log Out</span>
+              <span className="hidden sm:inline">{t("auth.logOut")}</span>
             </button>
           ) : currentView === "landing" ? (
             <button
@@ -546,7 +555,7 @@ export default function AuthPage() {
               }}
               className="px-4 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:shadow-lg text-[#06111b] shadow-md shadow-amber-500/20 transition-all cursor-pointer"
             >
-              Get Started
+              {t("auth.getStarted")}
             </button>
           ) : (
             <button
@@ -556,7 +565,7 @@ export default function AuthPage() {
               }}
               className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-[#09151f] text-amber-200 border border-amber-300/20 hover:bg-[#11253c] transition-all cursor-pointer"
             >
-              <span>← Back to Home</span>
+              <span>{t("auth.backHome")}</span>
             </button>
           )}
         </div>
@@ -608,13 +617,13 @@ export default function AuthPage() {
                 {/* Navigation */}
                 <nav className="flex-1 py-4 space-y-1">
                   {[
-                    { icon: <LayoutDashboard className="w-4 h-4" />, label: 'Dashboard', id: 'dashboard' },
-                    { icon: <Package className="w-4 h-4" />, label: 'Inventory', id: 'inventory' },
-                    { icon: <Share2 className="w-4 h-4" />, label: 'Social Media', id: 'social' },
-                    { icon: <Users className="w-4 h-4" />, label: 'Customers', id: 'customers' },
-                    { icon: <CreditCard className="w-4 h-4" />, label: 'Payments', id: 'payments' },
-                    { icon: <BarChart3 className="w-4 h-4" />, label: 'Analytics', id: 'analytics' },
-                    { icon: <Settings className="w-4 h-4" />, label: 'Settings', id: 'settings' },
+                    { icon: <LayoutDashboard className="w-4 h-4" />, label: t('dashboard.tabs.dashboard'), id: 'dashboard' },
+                    { icon: <Package className="w-4 h-4" />, label: t('dashboard.tabs.inventory'), id: 'inventory' },
+                    { icon: <Share2 className="w-4 h-4" />, label: t('dashboard.tabs.social'), id: 'social' },
+                    { icon: <Users className="w-4 h-4" />, label: t('dashboard.tabs.customers'), id: 'customers' },
+                    { icon: <CreditCard className="w-4 h-4" />, label: t('dashboard.tabs.payments'), id: 'payments' },
+                    { icon: <BarChart3 className="w-4 h-4" />, label: t('dashboard.tabs.analytics'), id: 'analytics' },
+                    { icon: <Settings className="w-4 h-4" />, label: t('dashboard.tabs.settings'), id: 'settings' },
                   ].map((item) => (
                     <button
                       key={item.id}
@@ -642,7 +651,7 @@ export default function AuthPage() {
                   className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all duration-300 border-t border-slate-100/50 pt-4"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span className="text-sm font-medium">Logout</span>
+                  <span className="text-sm font-medium">{t("dashboard.logout")}</span>
                 </button>
               </div>
 
@@ -653,15 +662,15 @@ export default function AuthPage() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-2xl font-extrabold text-slate-900">
-                      {activeTab === 'dashboard' && '📊 Dashboard'}
-                      {activeTab === 'inventory' && '📦 Inventory Management'}
-                      {activeTab === 'social' && '📱 Social Media'}
-                      {activeTab === 'customers' && '💬 Customers'}
-                      {activeTab === 'payments' && '💳 Payments'}
-                      {activeTab === 'analytics' && '📈 Analytics'}
-                      {activeTab === 'settings' && '⚙️ Settings'}
+                      {activeTab === 'dashboard' && t('dashboard.titles.dashboard')}
+                      {activeTab === 'inventory' && t('dashboard.titles.inventory')}
+                      {activeTab === 'social' && t('dashboard.titles.social')}
+                      {activeTab === 'customers' && t('dashboard.titles.customers')}
+                      {activeTab === 'payments' && t('dashboard.titles.payments')}
+                      {activeTab === 'analytics' && t('dashboard.titles.analytics')}
+                      {activeTab === 'settings' && t('dashboard.titles.settings')}
                     </h2>
-                    <p className="text-sm text-slate-500">Welcome back, {authenticatedUser}</p>
+                    <p className="text-sm text-slate-500">{t("dashboard.welcomeBack")}, {authenticatedUser}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -680,13 +689,13 @@ export default function AuthPage() {
                     <div className="rounded-3xl bg-gradient-to-r from-[#07111d] via-[#11253c] to-[#1b2f55] p-5 mb-6 text-white shadow-2xl shadow-amber-500/10 border border-amber-400/20">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.25em] text-violet-100 font-bold">AI Operations Hub</p>
-                          <h3 className="text-xl font-black mt-1">Your Digital FTE is running smoothly</h3>
-                          <p className="text-sm text-violet-50/90 mt-2">Live sales, social activity, and automation insights are all syncing in real time.</p>
+                          <p className="text-[10px] uppercase tracking-[0.25em] text-violet-100 font-bold">{t("dashboard.aiHub")}</p>
+                          <h3 className="text-xl font-black mt-1">{t("dashboard.runningSmooth")}</h3>
+                          <p className="text-sm text-violet-50/90 mt-2">{t("dashboard.liveSync")}</p>
                         </div>
                         <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                          <p className="text-[10px] uppercase tracking-[0.25em] text-violet-100">Status</p>
-                          <p className="text-lg font-bold">All systems online</p>
+                          <p className="text-[10px] uppercase tracking-[0.25em] text-violet-100">{t("dashboard.statusLabel")}</p>
+                          <p className="text-lg font-bold">{t("dashboard.allOnline")}</p>
                         </div>
                       </div>
                     </div>
@@ -1172,11 +1181,10 @@ export default function AuthPage() {
               {/* Progress Bar */}
               <div className="bg-gradient-to-r from-[#07111d] via-[#11253c] to-[#1b2f55] p-6 text-white">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-xl font-bold flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
-                    Setup Your Digital FTE
+                  <h2 className="text-xl font-bold">
+                    {t("onboarding.setupTitle")}
                   </h2>
-                  <span className="text-sm text-amber-200 bg-white/10 px-3 py-1 rounded-full">Step {onboardingStep} of {TOTAL_ONBOARDING_STEPS}</span>
+                  <span className="text-sm text-amber-200 bg-white/10 px-3 py-1 rounded-full">{t("onboarding.stepOf")} {onboardingStep} {t("onboarding.of")} {TOTAL_ONBOARDING_STEPS}</span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
                   <div 
@@ -1195,10 +1203,16 @@ export default function AuthPage() {
                       <div className="relative w-48 h-48 mx-auto">
                         <div className="absolute inset-0 rounded-full bg-amber-400/20 blur-2xl animate-pulse-slow" />
                         <div className="relative w-48 h-48 rounded-full flex items-center justify-center p-2">
-                          <InteractiveRobot isEmailFocused={false} isPasswordFocused={false} isPasswordVisible={false} isFullNameFocused={false} compact showOrbitItems={false} />
-                        </div>
-                        <div className="absolute -bottom-1.5 -right-1.5 bg-white/10 rounded-full p-1.5 shadow-lg border border-amber-300/30">
-                          <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                          <InteractiveRobot
+                            isEmailFocused={false}
+                            isPasswordFocused={false}
+                            isPasswordVisible={false}
+                            isFullNameFocused={false}
+                            compact
+                            showOrbitItems
+                            orbitRadiusX={125}
+                            orbitItemScale={0.95}
+                          />
                         </div>
                       </div>
 
@@ -1209,14 +1223,16 @@ export default function AuthPage() {
                         </div>
                       </div>
 
-                      <h3 className="text-2xl font-extrabold text-white mt-4">{getTimeBasedGreeting()}! Welcome to Digital FTE</h3>
-                      <p className="text-sm text-amber-100/90 mt-2">Let's walk through seven guided setup steps to launch your AI employee.</p>
+                      <h3 className="mt-4 cursor-pointer text-2xl font-extrabold text-white transition-all duration-300 hover:scale-105 hover:text-amber-200 active:scale-95">
+                        {t("onboarding.step1.headline")}
+                      </h3>
+                      <p className="text-sm text-amber-100/90 mt-2">{t("onboarding.step1.sub")}</p>
 
                       <div className="mt-8 flex items-center justify-center max-w-md mx-auto">
                         {[
-                          { icon: '🔗', label: 'Connect Store' },
-                          { icon: '📱', label: 'Connect Social' },
-                          { icon: '🚀', label: 'Ready!' },
+                          { icon: '🔗', label: t("onboarding.step1.connectStore") },
+                          { icon: '📱', label: t("onboarding.step1.connectSocial") },
+                          { icon: '🚀', label: t("onboarding.step1.readyLabel") },
                         ].map((item, i, arr) => (
                           <React.Fragment key={i}>
                             <div className="flex flex-col items-center gap-2">
@@ -1247,7 +1263,7 @@ export default function AuthPage() {
                           onClick={() => setOnboardingStep(2)}
                           className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 text-[#06111b] font-bold text-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
                         >
-                          Let's Start <ArrowRight className="w-4 h-4" />
+                          {t("onboarding.step1.startBtn")} <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -1258,22 +1274,22 @@ export default function AuthPage() {
                 {onboardingStep === 2 && (
                   <div className="animate-fade-in rounded-3xl border border-amber-400/30 bg-gradient-to-br from-[#07111d] via-[#10233f] to-[#193a5d] p-4 sm:p-8 text-white shadow-2xl shadow-amber-500/10">
                     <div className="flex flex-col md:flex-row items-start gap-6">
-                      <div className="flex-1 min-w-0 w-full">
+                      <div className="flex-1 min-w-0 w-full md:-translate-x-3">
                         <div className="mb-4">
                               <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-200 text-[10px] font-bold uppercase tracking-[0.25em] border border-amber-300/20">
-                            Step 2
+                            {t("onboarding.step2.stepLabel")}
                           </span>
-                          <h3 className="text-lg font-bold text-white mt-3">Connect Your Store</h3>
-                          <p className="text-sm text-amber-100/90">Enter your Shopify or E-Commerce website URL</p>
+                          <h3 className="mt-3 text-lg font-bold text-white md:translate-x-2">{t("onboarding.step2.title")}</h3>
+                          <p className="text-sm text-amber-100/90 md:translate-x-2">{t("onboarding.step2.desc")}</p>
                         </div>
                         <div className="mt-4 rounded-2xl bg-white/10 border border-white/10 p-4 backdrop-blur-sm">
-                          <label className="block text-[10px] font-bold text-amber-200 uppercase tracking-wider mb-1.5">Website URL</label>
+                          <label className="block text-[10px] font-bold text-amber-200 uppercase tracking-wider mb-1.5">{t("onboarding.step2.urlLabel")}</label>
                           <div className="flex flex-col sm:flex-row gap-3">
                             <input
                               type="url"
                               value={websiteUrl}
                               onChange={(e) => setWebsiteUrl(e.target.value)}
-                              placeholder="https://yourstore.com"
+                              placeholder={t("onboarding.step2.placeholder")}
                               className="flex-1 min-w-0 w-full px-4 py-3 border border-white/10 bg-white text-slate-900 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-300"
                             />
                             <button
@@ -1291,16 +1307,23 @@ export default function AuthPage() {
                               disabled={isConnecting}
                               className="w-full sm:w-auto shrink-0 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 text-[#06111b] font-bold text-sm hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
-                              {isConnecting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Connect Store'}
+                              {isConnecting ? <Loader2 className="w-5 h-5 animate-spin" /> : t("onboarding.step2.connectBtn")}
                             </button>
                           </div>
-                          <p className="text-[8px] text-amber-100/80 mt-2 flex items-center gap-1">
-                            <ShieldCheck className="w-3 h-3" /> Must be HTTPS • Valid domain required
+                          <p className="text-[8px] text-amber-100/80 mt-3 flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3" /> {t("onboarding.step2.secureNote")}
                           </p>
                         </div>
                       </div>
                       <div className="hidden md:block w-48 h-48">
-                        <InteractiveRobot isEmailFocused={false} isPasswordFocused={false} isPasswordVisible={false} compact />
+                        <InteractiveRobot
+                          isEmailFocused={false}
+                          isPasswordFocused={false}
+                          isPasswordVisible={false}
+                          compact
+                          orbitRadiusX={70}
+                          orbitItemScale={0.72}
+                        />
                       </div>
                     </div>
                   </div>
@@ -1318,16 +1341,12 @@ export default function AuthPage() {
 
                         <span className="px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-400/30 inline-flex items-center gap-1.5 mb-3">
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                          Store Live Connected
+                          {t("onboarding.step3.badge")}
                         </span>
 
                         <h3 className="text-2xl font-black text-white tracking-tight">
-                          Store Connected Successfully!
+                          {t("onboarding.step3.title")}
                         </h3>
-                        <p className="text-xs sm:text-sm text-amber-100/90 max-w-md mx-auto mt-2 leading-relaxed">
-                            Your store <span className="text-amber-300 font-bold underline">{websiteUrl || "https://saeedghani.pk"}</span> is now securely linked with Digital FTE AI container.
-                        </p>
-
                         <div className="mt-6 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-left max-w-md mx-auto space-y-3">
                           <div className="flex items-center justify-between border-b border-white/10 pb-3">
                             <div className="flex items-center gap-3">
@@ -1341,22 +1360,22 @@ export default function AuthPage() {
                                 <p className="text-[11px] text-amber-100/80">{websiteUrl || "https://saeedghani.pk"}</p>
                               </div>
                             </div>
-                            <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
-                              Active
+                            <span className="px-2.5 py-1 rounded-lg bg-amber-200/90 text-amber-900 text-[10px] font-bold border border-amber-300">
+                              {t("onboarding.step3.active")}
                             </span>
                           </div>
 
                           <div className="grid grid-cols-2 gap-2 text-xs pt-1">
                             <div className="p-2.5 bg-white/5 rounded-xl border border-white/5">
-                              <span className="text-slate-400 block text-[9px] uppercase font-bold">API Sync</span>
+                              <span className="text-slate-400 block text-[9px] uppercase font-bold">{t("onboarding.step3.apiSync")}</span>
                               <span className="text-emerald-300 font-bold flex items-center gap-1 mt-0.5">
-                                <Zap className="w-3 h-3 text-emerald-400" /> Operational
+                                <Zap className="w-3 h-3 text-emerald-400" /> {t("onboarding.step3.operational")}
                               </span>
                             </div>
                             <div className="p-2.5 bg-white/5 rounded-xl border border-white/5">
-                              <span className="text-slate-400 block text-[9px] uppercase font-bold">Security</span>
+                              <span className="text-slate-400 block text-[9px] uppercase font-bold">{t("onboarding.step3.security")}</span>
                               <span className="text-amber-300 font-bold flex items-center gap-1 mt-0.5">
-                                <ShieldCheck className="w-3 h-3 text-amber-400" /> Encrypted
+                                <ShieldCheck className="w-3 h-3 text-amber-400" /> {t("onboarding.step3.encrypted")}
                               </span>
                             </div>
                           </div>
@@ -1369,128 +1388,25 @@ export default function AuthPage() {
                         onClick={() => setOnboardingStep((s) => Math.max(1, s - 1))}
                         className="flex-1 py-3.5 px-4 rounded-xl bg-white/10 border border-amber-300/20 text-amber-100 font-bold text-sm hover:bg-white/20 transition-all"
                       >
-                        ← Back
+                        {t("onboarding.step3.backBtn")}
                       </button>
                       <button
                         onClick={() => setOnboardingStep(4)}
                         className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 text-[#06111b] font-bold text-sm hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
                       >
-                        Next Step <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 4: Ready to Continue */}
-                {onboardingStep === 4 && (
-                  <div className="animate-fade-in space-y-6">
-                    <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#07111d] via-[#10233f] to-[#193a5d] border border-amber-400/30 p-3.5 rounded-2xl shadow-lg shadow-amber-500/10 text-white">
-                      <div className="flex items-center gap-2.5">
-                        <img 
-                          src={`https://www.google.com/s2/favicons?domain=${getDomainFromUrl(websiteUrl)}&sz=64`} 
-                          alt="Favicon" 
-                          className="w-5 h-5 rounded-md border border-white/10 bg-white p-0.5"
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-white">{getSiteNameFromUrl(websiteUrl)}</span>
-                          <span className="text-[10px] text-amber-200">{getDomainFromUrl(websiteUrl)}</span>
-                        </div>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 text-[10px] font-bold border border-emerald-400/30">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                          Connected
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-[11px] font-semibold text-amber-100 bg-white/10 px-3 py-1 rounded-full border border-amber-300/20">
-                        <Zap className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Est. Time: ~1 Min Left</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                      <div className="md:col-span-7 space-y-4">
-                        <div>
-                          <span className="px-3 py-1 bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-400/30 text-amber-700 text-xs font-bold rounded-full inline-block mb-2">
-                            🚀 Almost Ready For Takeoff
-                          </span>
-                          <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-                            Ready to Connect Social Channels?
-                          </h3>
-                          <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
-                            Linking your social channels enables your Digital FTE to auto-create posts, schedule viral campaigns, and auto-reply to comments on autopilot.
-                          </p>
-                        </div>
-
-                        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-2">
-                          <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Setup Roadmap</p>
-                          <div className="space-y-1.5 text-xs">
-                            <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-900 font-medium">
-                              <span className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600"/> Store Connection
-                              </span>
-                              <span className="text-[10px] font-bold bg-emerald-200/60 px-2 py-0.5 rounded-md">Done</span>
-                            </div>
-
-                            <div className="flex items-center justify-between p-2 rounded-xl bg-amber-100/80 border border-amber-300 text-amber-950 font-bold shadow-sm">
-                              <span className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-amber-600 animate-pulse"/> Social Channels Link
-                              </span>
-                              <span className="text-[10px] font-bold bg-amber-600 text-white px-2 py-0.5 rounded-md">Next Step</span>
-                            </div>
-
-                            <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 text-slate-400 font-medium opacity-70">
-                              <span className="flex items-center gap-2">
-                                <LayoutDashboard className="w-4 h-4"/> AI Workspace Activation
-                              </span>
-                              <span className="text-[10px] font-bold bg-slate-100 px-2 py-0.5 rounded-md">Pending</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="md:col-span-5 flex flex-col items-center justify-center relative">
-                        <div className="bg-gradient-to-br from-[#07111d] to-[#10233f] text-white text-xs p-3.5 rounded-2xl shadow-xl border border-amber-400/30 relative mb-3 max-w-[220px] text-center animate-bounce-slow">
-                          <p className="font-semibold leading-snug">
-                            "Awesome! Store setup complete. Let's link your social channels now! 📱"
-                          </p>
-                          <div className="w-3 h-3 bg-indigo-900 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-r border-b border-violet-400/30" />
-                        </div>
-
-                        <div className="w-36 h-36">
-                          <InteractiveRobot isEmailFocused={false} isPasswordFocused={false} isPasswordVisible={false} compact />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setOnboardingStep((s) => Math.max(1, s - 1))}
-                        className="flex-1 py-3.5 px-4 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:shadow-md transition-all"
-                      >
-                        ← Back
-                      </button>
-                      <button
-                        onClick={() => setOnboardingStep(5)}
-                        className="flex-1 py-4 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 text-[#06111b] font-extrabold text-sm hover:shadow-xl hover:shadow-amber-500/25 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
-                      >
-                        <span>Connect Social Media Accounts</span>
-                        <ArrowRight className="w-4 h-4"/>
+                        {t("onboarding.step3.nextBtn")} <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 )}
 
                 {/* STEP 5: Social Media Connection */}
-                {onboardingStep === 5 && (
+                {onboardingStep === 4 && (
                   <div className="animate-fade-in space-y-6">
                     <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#07111d] via-[#10233f] to-[#193a5d] border border-amber-400/30 p-3.5 rounded-2xl shadow-lg shadow-amber-500/10 text-white">
                       <div>
-                        <h3 className="text-lg font-black text-white">Connect Social Channels</h3>
-                        <p className="text-xs text-amber-200">Enable autonomous AI social posting and engagement</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-amber-300/20 text-amber-100 text-[11px] font-bold shadow-sm">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400"/>
-                        <span>OAuth 2.0 Encrypted</span>
+                        <h3 className="text-lg font-black text-white">{t("onboarding.step5.title")}</h3>
+                        <p className="text-xs text-amber-200">{t("onboarding.step5.desc")}</p>
                       </div>
                     </div>
 
@@ -1530,26 +1446,40 @@ export default function AuthPage() {
 
                               {item.connected && (
                                 <div className="mt-2.5 pt-2 border-t border-emerald-200/60 flex items-center justify-between text-[10px]">
-                                  <span className="font-mono text-emerald-900 font-bold">{item.handle}</span>
-                                  <span className="px-1.5 py-0.5 rounded bg-emerald-200/60 text-emerald-800 font-bold">Linked</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="px-1.5 py-0.5 rounded bg-emerald-200/60 text-emerald-800 font-bold">Linked</span>
+                                    <button
+                                      type="button"
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        item.setter(false);
+                                      }}
+                                      className="rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 font-bold text-rose-700 transition-colors hover:bg-rose-100"
+                                    >
+                                      {t("onboarding.step5.disconnect")}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {!item.connected && (
+                                <div className="mt-2.5 flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      item.setter(true);
+                                    }}
+                                    className="rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 transition-colors hover:bg-amber-100"
+                                  >
+                                    {t("onboarding.step5.connect")}
+                                  </button>
                                 </div>
                               )}
                             </div>
                           ))}
                         </div>
 
-                        <div className="p-3 bg-gradient-to-r from-violet-900 to-indigo-950 rounded-2xl text-white flex items-center justify-between text-xs shadow-md">
-                          <div className="flex items-center gap-2.5">
-                            <Sparkles className="w-4 h-4 text-amber-300 animate-pulse"/>
-                            <div>
-                              <p className="font-bold">Estimated Social Reach Impact</p>
-                              <p className="text-[10px] text-violet-200">~45,000+ Potential Organic Audience Impressions / Mo</p>
-                            </div>
-                          </div>
-                          <span className="px-2.5 py-1 bg-white/10 rounded-lg text-[10px] font-mono font-bold text-emerald-300 border border-white/10">
-                            AI Automated
-                          </span>
-                        </div>
                       </div>
 
                       <div className="md:col-span-4 flex flex-col items-center justify-center relative pt-2">
@@ -1561,7 +1491,13 @@ export default function AuthPage() {
                         </div>
 
                         <div className="w-36 h-36">
-                          <InteractiveRobot isEmailFocused={false} isPasswordFocused={false} isPasswordVisible={false} compact />
+                          <InteractiveRobot
+                            isEmailFocused={false}
+                            isPasswordFocused={false}
+                            isPasswordVisible={false}
+                            compact
+                            orbitRadiusX={115}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1571,7 +1507,7 @@ export default function AuthPage() {
                         onClick={() => setOnboardingStep((s) => Math.max(1, s - 1))}
                         className="flex-1 py-3.5 px-4 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:shadow-md transition-all"
                       >
-                        ← Back
+                        {t("common.back")}
                       </button>
                       <button
                         onClick={() => {
@@ -1579,11 +1515,11 @@ export default function AuthPage() {
                             showToast("⚠️ Please connect at least one social account!", "error");
                             return;
                           }
-                          setOnboardingStep(6);
+                          setOnboardingStep(5);
                         }}
                         className="flex-1 py-4 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 text-[#06111b] font-extrabold text-sm hover:shadow-xl hover:shadow-amber-500/25 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
                       >
-                        <span>Continue to Final Setup</span>
+                        <span>{t("onboarding.step5.nextBtn")}</span>
                         <ArrowRight className="w-4 h-4"/>
                       </button>
                     </div>
@@ -1591,7 +1527,7 @@ export default function AuthPage() {
                 )}
 
                 {/* STEP 6: All Connected Launchpad */}
-                {onboardingStep === 6 && (
+                {onboardingStep === 5 && (
                   <div className="animate-fade-in space-y-6">
                     <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#07111d] via-[#10233f] to-[#193a5d] border border-amber-400/30 p-3.5 rounded-2xl shadow-lg shadow-amber-500/10 text-white">
                       <div className="flex items-center gap-2">
@@ -1601,24 +1537,21 @@ export default function AuthPage() {
                         </span>
                         <span className="text-xs font-extrabold text-white">System Readiness: 100%</span>
                       </div>
-                      <span className="text-[11px] font-bold text-amber-100 bg-white/10 px-3 py-1 rounded-full border border-amber-300/20">
-                        AI Container: FTE-01 "Apex"
-                      </span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                       <div className="md:col-span-8 space-y-4">
                         <div>
                           <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-                            All Connected & Ready! 🎉
+                            {t("onboarding.step6.title")}
                           </h3>
                           <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                            Your store and social channels are successfully linked with Digital FTE.
+                            {t("onboarding.step6.socialConnected")}
                           </p>
                         </div>
 
                         <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
-                          <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Connected Ecosystem</p>
+                          <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">{t("onboarding.step6.readyForLaunch")}</p>
                           <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                             <div className="flex items-center gap-2.5">
                               <img 
@@ -1631,20 +1564,20 @@ export default function AuthPage() {
                                 <span className="text-[10px] text-slate-400">{getDomainFromUrl(websiteUrl)}</span>
                               </div>
                             </div>
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">Store Active</span>
+                            <span className="text-[10px] font-bold text-amber-900 bg-amber-200/90 px-2.5 py-0.5 rounded-full">{t("onboarding.step3.active")}</span>
                           </div>
 
                           <div className="flex flex-wrap gap-2 pt-1">
-                            {instagramConnected && <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-50 border border-pink-200 text-pink-700 text-xs font-bold"><Instagram className="w-3.5 h-3.5"/> Instagram</span>}
-                            {facebookConnected && <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold"><Facebook className="w-3.5 h-3.5"/> Facebook</span>}
-                            {tiktokConnected && <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold"><Music className="w-3.5 h-3.5"/> TikTok</span>}
-                            {youtubeConnected && <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-bold"><Youtube className="w-3.5 h-3.5"/> YouTube</span>}
-                            {twitterConnected && <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold"><Twitter className="w-3.5 h-3.5"/> Twitter</span>}
+                            {instagramConnected && <span className="inline-flex items-center gap-1 rounded-lg border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-bold text-pink-700 shadow-sm"><Instagram className="h-3.5 w-3.5"/> Instagram</span>}
+                            {facebookConnected && <span className="inline-flex items-center gap-1 rounded-lg border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-bold text-pink-700 shadow-sm"><Facebook className="h-3.5 w-3.5"/> Facebook</span>}
+                            {tiktokConnected && <span className="inline-flex items-center gap-1 rounded-lg border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-bold text-pink-700 shadow-sm"><Music className="h-3.5 w-3.5"/> TikTok</span>}
+                            {youtubeConnected && <span className="inline-flex items-center gap-1 rounded-lg border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-bold text-pink-700 shadow-sm"><Youtube className="h-3.5 w-3.5"/> YouTube</span>}
+                            {twitterConnected && <span className="inline-flex items-center gap-1 rounded-lg border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-bold text-pink-700 shadow-sm"><Twitter className="h-3.5 w-3.5"/> Twitter</span>}
                           </div>
                         </div>
 
                         <div className="bg-gradient-to-r from-[#07111d] to-[#10233f] rounded-2xl p-4 text-white space-y-2.5 shadow-md border border-amber-400/20">
-                          <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">Automated AI Services Activated</p>
+                          <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">{t("onboarding.step6.launchingTitle")}</p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                             <div className="flex items-center gap-2 bg-white/10 p-2 rounded-xl border border-white/10">
                               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0"/>
@@ -1664,18 +1597,26 @@ export default function AuthPage() {
                             </div>
                           </div>
                         </div>
+
                       </div>
 
                       <div className="md:col-span-4 flex flex-col items-center justify-center relative pt-2">
                         <div className="bg-gradient-to-br from-[#07111d] to-[#10233f] text-white text-xs p-3.5 rounded-2xl shadow-xl border border-amber-400/30 relative mb-3 max-w-[210px] text-center animate-bounce-slow">
                           <p className="font-semibold leading-snug">
-                            "All systems green! I'm fully trained and ready to manage your store. Let's launch! 🚀"
+                            {t("onboarding.step6.robotMsg")}
                           </p>
                           <div className="w-3 h-3 bg-[#10233f] rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-r border-b border-amber-400/30" />
                         </div>
 
                         <div className="w-36 h-36">
-                          <InteractiveRobot isEmailFocused={false} isPasswordFocused={false} isPasswordVisible={false} compact />
+                          <InteractiveRobot
+                            isEmailFocused={false}
+                            isPasswordFocused={false}
+                            isPasswordVisible={false}
+                            compact
+                            orbitRadiusX={82}
+                            orbitItemScale={0.82}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1685,25 +1626,25 @@ export default function AuthPage() {
                         onClick={() => setOnboardingStep((s) => Math.max(2, s - 1))}
                         className="flex-1 py-3.5 px-4 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:shadow-md transition-all"
                       >
-                        ← Back
+                        {t("common.back")}
                       </button>
                       <button
                         onClick={() => {
                           setIsReady(true);
-                          setOnboardingStep(7);
+                          setOnboardingStep(6);
                           setShowActivationScreen(true);
                           showToast("🎉 Initializing Digital FTE Agent...", "info");
                         }}
                         className="flex-1 py-4 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 text-[#06111b] font-extrabold text-sm hover:shadow-xl hover:shadow-amber-500/25 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
                       >
-                        <span>🚀 Launch Digital FTE Workspace</span>
+                        <span>{t("onboarding.step6.launchBtn")}</span>
                       </button>
                     </div>
                   </div>
                 )}
 
                 {/* ========== STEP 7: Activation Sequence ========== */}
-                {onboardingStep === 7 && !showDashboard && (
+                {onboardingStep === 6 && !showDashboard && (
                   <div className="animate-fade-in">
                     {showActivationScreen ? (
                       <LaunchActivationScreen
@@ -1720,16 +1661,16 @@ export default function AuthPage() {
                             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-amber-500 to-yellow-400 flex items-center justify-center mx-auto shadow-2xl shadow-amber-500/30">
                               <Loader2 className="w-14 h-14 text-[#06111b] animate-spin" />
                             </div>
-                            <h2 className="text-3xl font-extrabold text-slate-900 mt-6">⏳ Setting Up Your Digital FTE</h2>
-                            <p className="text-sm text-slate-500 mt-2">This will take about 2 minutes...</p>
+                            <h2 className="text-3xl font-extrabold text-slate-900 mt-6">{t("onboarding.step7.title")}</h2>
+                            <p className="text-sm text-slate-500 mt-2">{t("onboarding.step7.desc")}</p>
                             <div className="mt-6 max-w-sm mx-auto">
                               <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
                                 <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-1000 w-[33%] animate-pulse" />
                               </div>
                               <div className="flex justify-between text-[8px] text-slate-400 mt-2">
-                                <span className="animate-pulse">Connecting AI</span>
-                                <span className="animate-pulse delay-300">Building Dashboard</span>
-                                <span className="animate-pulse delay-700">Ready! 🚀</span>
+                                <span className="animate-pulse">{t("onboarding.step7.launching")}</span>
+                                <span className="animate-pulse delay-300">{t("dashboard.aiHub")}</span>
+                                <span className="animate-pulse delay-700">{t("onboarding.step6.readyForLaunch")}</span>
                               </div>
                             </div>
                             <p className="text-[10px] text-slate-400 mt-4 flex items-center justify-center gap-2">
@@ -1738,10 +1679,10 @@ export default function AuthPage() {
                             </p>
                             <div className="mt-6 flex justify-center">
                               <button
-                                onClick={() => setOnboardingStep(6)}
+                                onClick={() => setOnboardingStep(5)}
                                 className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 font-semibold hover:shadow-md"
                               >
-                                ← Back
+                                {t("common.back")}
                               </button>
                             </div>
                           </div>
@@ -1763,14 +1704,14 @@ export default function AuthPage() {
               <div className="lg:col-span-7 flex flex-col items-start text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold mb-6 tracking-wide uppercase shadow-sm hover:shadow-md hover:bg-amber-500/15 transition-all animate-pulse">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                  <span>AI-POWERED E-COMMERCE EMPLOYEE</span>
+                  <span>{t("hero.badge")}</span>
                 </div>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6 animate-fade-in">
-                  Your AI Digital FTE, <br />
-                  <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent animate-pulse">Working 24/7 for You.</span>
+                  {t("hero.headline1")} <br />
+                  <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent animate-pulse">{t("hero.headline2")} {t("hero.headline3")}</span>
                 </h1>
                 <p className="text-base sm:text-lg text-slate-300 max-w-xl leading-relaxed mb-8 animate-fade-in-delay">
-                  One AI Employee that manages your store, engages customers, creates content, and grows your revenue—so you can focus on what matters most.
+                  {t("hero.subheadline")}
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8 w-full sm:w-auto animate-fade-in-delay">
                   <button
@@ -1781,33 +1722,31 @@ export default function AuthPage() {
                     }}
                     className="px-8 py-4 text-sm font-bold text-center rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:shadow-xl text-[#06111b] shadow-lg shadow-amber-500/20 transform hover:scale-105 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 duration-300"
                   >
-                    <span>Start Free Trial</span>
+                    <span>{t("hero.ctaPrimary")}</span>
                     <ArrowRight className="w-4 h-4 animate-bounce-right" />
                   </button>
-                  <button
-                    onClick={() => {
-                      showToast("Launching interactive feature demonstration...", "info");
-                    }}
+                  <a
+                    href="#live-playground"
                     className="px-8 py-4 text-sm font-bold text-center rounded-xl bg-[#07111d] border border-amber-400/20 text-amber-200 hover:bg-[#0c2034] hover:shadow-md hover:scale-105 transition-all cursor-pointer flex items-center justify-center gap-2 duration-300"
                   >
                     <div className="w-5 h-5 rounded-full bg-amber-500/15 flex items-center justify-center text-amber-300">
-                      <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                      <Play className="w-2.5 h-2.5 fill-current" />
                     </div>
-                    <span>Watch Demo</span>
-                  </button>
+                    <span>{t("hero.demoLabel") || "Live Simulation"}</span>
+                  </a>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl w-full">
                   <div className="rounded-2xl border border-white/10 bg-[#071121] p-4 text-sm text-slate-200 shadow-lg shadow-black/10">
-                    <p className="font-bold text-white">Fast and Secure</p>
-                    <p className="mt-2 text-slate-400">Get set up quickly with protected onboarding.</p>
+                    <p className="font-bold text-white">{t("hero.benefitFast")}</p>
+                    <p className="mt-2 text-slate-400">{t("hero.benefitFastDesc")}</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-[#071121] p-4 text-sm text-slate-200 shadow-lg shadow-black/10">
-                    <p className="font-bold text-white">No Credit Card</p>
-                    <p className="mt-2 text-slate-400">Try the AI workflow risk-free before paying.</p>
+                    <p className="font-bold text-white">{t("hero.benefitNoCard")}</p>
+                    <p className="mt-2 text-slate-400">{t("hero.benefitNoCardDesc")}</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-[#071121] p-4 text-sm text-slate-200 shadow-lg shadow-black/10">
-                    <p className="font-bold text-white">Cancel Anytime</p>
-                    <p className="mt-2 text-slate-400">Keep control of your plan without commitment.</p>
+                    <p className="font-bold text-white">{t("hero.benefitCancel")}</p>
+                    <p className="mt-2 text-slate-400">{t("hero.benefitCancelDesc")}</p>
                   </div>
                 </div>
               </div>
@@ -1830,7 +1769,15 @@ export default function AuthPage() {
                   <div className="absolute -inset-1.5 rounded-full animate-spin-slow" style={{ animationPlayState: robotMotionPaused ? "paused" : "running" }} />
                   <div className="absolute -inset-8 rounded-full animate-pulse" style={{ animationPlayState: robotMotionPaused ? "paused" : "running" }} />
                   <div className="relative z-10 h-[300px] w-[300px] robot-emitter transition-transform duration-500 hover:scale-105 sm:h-[360px] sm:w-[360px]">
-                    <InteractiveRobot isEmailFocused={false} isPasswordFocused={false} isPasswordVisible={false} isWaving showWelcome motionPaused={robotMotionPaused} />
+                    <InteractiveRobot
+                      isEmailFocused={false}
+                      isPasswordFocused={false}
+                      isPasswordVisible={false}
+                      isWaving
+                      showWelcome
+                      motionPaused={false}
+                      orbitRadiusX={190}
+                    />
                   </div>
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[220px] sm:w-[250px] h-[20px] bg-gradient-to-r from-slate-900 to-slate-800 border-t border-slate-700/50 rounded-b-lg shadow-xl flex items-center justify-center px-10">
                     <div className="w-12 h-1 bg-slate-700 rounded-full" />
@@ -1839,6 +1786,474 @@ export default function AuthPage() {
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[200px] h-3 bg-amber-500/10 rounded-full blur-sm animate-pulse-shadow" />
               </div>
             </div>
+
+            {/* 1. PLATFORM & ECOSYSTEM INTEGRATIONS */}
+            <div id="integrations" className="pt-8 pb-4 border-y border-white/5">
+              <p className="text-center text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">
+                Connected Native Integrations & Infrastructure
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-slate-300">
+                {[
+                  { name: "Shopify", badge: "Direct Webhooks", color: "from-emerald-500/20 to-green-500/10 border-emerald-500/30 text-emerald-300" },
+                  { name: "WooCommerce", badge: "REST Sync", color: "from-purple-500/20 to-violet-500/10 border-purple-500/30 text-purple-300" },
+                  { name: "Instagram", badge: "Meta Graph API", color: "from-pink-500/20 to-rose-500/10 border-pink-500/30 text-pink-300" },
+                  { name: "Facebook", badge: "Catalog & Comments", color: "from-blue-500/20 to-cyan-500/10 border-blue-500/30 text-blue-300" },
+                  { name: "TikTok Shop", badge: "Viral Queue", color: "from-slate-700/40 to-slate-800/20 border-slate-600/40 text-slate-200" },
+                  { name: "YouTube", badge: "Community Posts", color: "from-red-500/20 to-rose-500/10 border-red-500/30 text-red-300" },
+                  { name: "Google Gemini 2.5", badge: "Multimodal AI", color: "from-amber-500/20 to-yellow-500/10 border-amber-500/30 text-amber-300" },
+                  { name: "Redis & Postgres", badge: "Sub-Second Bus", color: "from-orange-500/20 to-amber-500/10 border-orange-500/30 text-orange-300" },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-gradient-to-br ${item.color} border backdrop-blur-md shadow-sm hover:scale-105 transition-all duration-200`}
+                  >
+                    <span className="text-sm font-bold text-white">{item.name}</span>
+                    <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-black/40 text-white/80">
+                      {item.badge}
+                    </span>
+                    
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. THE 7 AUTONOMOUS AI AGENTS */}
+            <div id="ai-workforce" className="py-8 space-y-12">
+              <div className="text-center max-w-3xl mx-auto space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                  <Bot className="w-3.5 h-3.5" />
+                  Your 24/7 Digital Workforce
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
+                  Seven Specialized AI Agents. <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-300">
+                    Zero Human Churn.
+                  </span>
+                </h2>
+                <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+                  Unlike single-purpose bots, Digital FTE coordinates 7 specialized agents operating in an event-driven loop. Each agent owns a critical pillar of your e-commerce operations.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  {
+                    num: "01",
+                    role: "Inventory & Stock Sync",
+                    desc: "Listens to live Shopify webhooks, prevents overselling, detects low stock, and automatically prepares supplier replenishment orders.",
+                    icon: Package,
+                    badge: "Real-Time Sync",
+                    metrics: "Sub-Second SKU Updates",
+                    accent: "border-amber-500/30 group-hover:border-amber-400/60"
+                  },
+                  {
+                    num: "02",
+                    role: "AI Creative Studio",
+                    desc: "Gemini-powered copywriter crafts conversion-focused captions, hashtags, and product lifestyle renders aligned with your brand guidelines.",
+                    icon: Sparkles,
+                    badge: "Gemini 2.5 Flash",
+                    metrics: "10x Faster Post Creation",
+                    accent: "border-purple-500/30 group-hover:border-purple-400/60"
+                  },
+                  {
+                    num: "03",
+                    role: "Omnichannel Scheduler",
+                    desc: "Automatically schedules and publishes content to Instagram, Facebook, TikTok, YouTube, and LinkedIn at peak audience engagement windows.",
+                    icon: Calendar,
+                    badge: "5 Platforms",
+                    metrics: "100% Autonomous Queue",
+                    accent: "border-blue-500/30 group-hover:border-blue-400/60"
+                  },
+                  {
+                    num: "04",
+                    role: "Comment & Engagement Agent",
+                    desc: "Monitors post comments 24/7. Auto-replies to price and sizing questions, hides spam/toxic comments, and boosts algorithmic organic reach.",
+                    icon: MessageCircle,
+                    badge: "Sentiment Filter",
+                    metrics: "< 3s Response Time",
+                    accent: "border-emerald-500/30 group-hover:border-emerald-400/60"
+                  },
+                  {
+                    num: "05",
+                    role: "Bilingual Customer Support",
+                    desc: "Handles live storefront chat inquiries in native English and Urdu (اردو). Performs instant order tracking, cart assists, and returns lookups.",
+                    icon: Bot,
+                    badge: "EN & اردو Native",
+                    metrics: "99.4% First-Contact Resolution",
+                    accent: "border-rose-500/30 group-hover:border-rose-400/60"
+                  },
+                  {
+                    num: "06",
+                    role: "Revenue & Analytics Agent",
+                    desc: "Performs hourly order rollups, daily P&L digests, and anomaly detection so you always know your profit margins without opening spreadsheets.",
+                    icon: BarChart3,
+                    badge: "Hourly Rollup",
+                    metrics: "Automated Daily P&L",
+                    accent: "border-cyan-500/30 group-hover:border-cyan-400/60"
+                  },
+                  {
+                    num: "07",
+                    role: "Master Orchestrator",
+                    desc: "The brain behind the system: manages agent heartbeats, multi-step workflows, task queues in Redis, and human-in-the-loop escalations.",
+                    icon: Cpu,
+                    badge: "Core Controller",
+                    metrics: "Fault-Tolerant Heartbeat",
+                    accent: "border-yellow-500/30 group-hover:border-yellow-400/60",
+                    spanFull: true
+                  },
+                ].map((agent, i) => (
+                  <div
+                    key={i}
+                    className={`p-6 sm:p-8 rounded-3xl bg-[#07111d]/90 border ${agent.accent} backdrop-blur-xl relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between ${agent.spanFull ? "lg:col-span-3 bg-gradient-to-r from-[#07111d] via-[#0d1c2d] to-[#07111d]" : ""}`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs font-mono font-bold text-amber-400/80 px-2 py-1 rounded-md bg-amber-400/10">
+                          Agent #{agent.num}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-400 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
+                          {agent.badge}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                          <agent.icon className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">
+                          {agent.role}
+                        </h3>
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
+                        {agent.desc}
+                      </p>
+                    </div>
+                    <div className="pt-4 border-t border-white/5 flex items-center justify-between text-xs text-slate-300">
+                      <span className="text-emerald-400 font-medium flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        {agent.metrics}
+                      </span>
+                      <span className="text-slate-500 group-hover:text-amber-400 transition-colors">24/7 Autopilot →</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. INTERACTIVE SIMULATION PLAYGROUND */}
+            <div id="live-playground" className="py-8 space-y-8">
+              <div className="text-center max-w-2xl mx-auto space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-bold uppercase tracking-wider">
+                  <Play className="w-3.5 h-3.5" />
+                  Interactive Demo
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                  Experience Your AI FTE Live
+                </h2>
+                <p className="text-slate-400 text-sm sm:text-base">
+                  Test how the autonomous agents react to real e-commerce store events right in your browser.
+                </p>
+              </div>
+
+              {/* Playground Container */}
+              <div className="p-6 sm:p-10 rounded-3xl bg-[#07111d]/95 border border-white/10 shadow-2xl backdrop-blur-xl max-w-4xl mx-auto">
+                
+                {/* Tabs */}
+                <div className="flex flex-wrap items-center justify-center gap-2 mb-8 border-b border-white/10 pb-4">
+                  {[
+                    { id: "inventory", label: "📦 Inventory Auto-Alert" },
+                    { id: "content", label: "✨ AI Caption Studio" },
+                    { id: "support", label: "🤖 24/7 Bilingual Chat" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSimActiveTab(tab.id as any)}
+                      className={`px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                        simActiveTab === tab.id
+                          ? "bg-amber-400 text-[#06111b] shadow-lg shadow-amber-400/20 scale-105"
+                          : "bg-white/5 text-slate-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tab 1: Inventory Alert Simulation */}
+                {simActiveTab === "inventory" && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                      <div>
+                        <h4 className="text-sm font-bold text-white">Scenario: Product Stock Drops to 2 Units</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Item: Classic Leather Jacket (SKU: LJ-BLK-04)</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSimStockTriggered(true);
+                          showToast("⚡ Stock event triggered: Agent 1 activated!", "info");
+                        }}
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/40 hover:bg-amber-400/30 transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Zap className="w-3.5 h-3.5" />
+                        Trigger Low-Stock Event
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Shopify Webhook Input</span>
+                        <pre className="text-xs font-mono text-amber-300/90 overflow-x-auto bg-black/60 p-3 rounded-xl">
+{`{
+  "event": "orders/create",
+  "sku": "LJ-BLK-04",
+  "remaining_stock": ${simStockTriggered ? "2" : "14"},
+  "status": "${simStockTriggered ? "LOW_STOCK_ALERT" : "HEALTHY"}"
+}`}
+                        </pre>
+                      </div>
+
+                      <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border border-amber-500/30 space-y-3">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Autonomous Agent Actions
+                        </span>
+                        {simStockTriggered ? (
+                          <div className="space-y-2 text-xs text-slate-200">
+                            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
+                              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                              <span>Synced inventory count across Shopify & TikTok</span>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2">
+                              <Bell className="w-4 h-4 text-amber-400 shrink-0" />
+                              <span>Pushed supplier replenishment draft to dashboard</span>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center gap-2">
+                              <Share2 className="w-4 h-4 text-blue-400 shrink-0" />
+                              <span>Flagged "Hurry, only 2 left!" on live product page</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="h-28 flex items-center justify-center text-xs text-slate-400 italic text-center">
+                            Click "Trigger Low-Stock Event" above to see real-time agent workflow
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 2: AI Caption Studio Simulation */}
+                {simActiveTab === "content" && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                      <div>
+                        <h4 className="text-sm font-bold text-white">Target Product: Minimalist Chronograph Watch</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Tone: Luxury & Aesthetic • Channel: Instagram & TikTok</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSimContentGenerating(true);
+                          setTimeout(() => {
+                            setSimContentGenerating(false);
+                            setSimGeneratedPost(true);
+                            showToast("✨ Post crafted by Google Gemini 2.5!", "success");
+                          }, 800);
+                        }}
+                        disabled={simContentGenerating}
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30 transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        {simContentGenerating ? "Crafting Copy..." : "Generate Social Post"}
+                      </button>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-black/40 border border-white/10">
+                      {simGeneratedPost ? (
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-500 via-rose-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                              IG
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-white">yourstore_official • <span className="text-amber-400 font-normal">Auto-Scheduled</span></p>
+                              <p className="text-[10px] text-slate-400">Optimal engagement window: Today at 6:45 PM</p>
+                            </div>
+                          </div>
+                          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">
+                            Precision meets timeless elegance. ⏳ Crafted for those who value every second, our Minimalist Chronograph is engineered with sapphire crystal glass and genuine Italian leather.
+                            <br /><br />
+                            ⚡ Limited production batch now live on store. Tap the link in bio to claim yours with complimentary worldwide shipping.
+                            <br /><br />
+                            <span className="text-amber-400">#LuxuryTimepiece #MinimalistDesign #ModernElegance #WatchCollector #ECommerceStyle</span>
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="h-28 flex items-center justify-center text-xs text-slate-400 italic text-center">
+                          Click "Generate Social Post" above to simulate Google Gemini copywriter
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 3: Bilingual Support Simulation */}
+                {simActiveTab === "support" && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
+                      <div>
+                        <h4 className="text-sm font-bold text-white">24/7 Storefront Live Chatbot</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Supports both English and Urdu (اردو) automatically</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
+                        <button
+                          onClick={() => setSimChatLanguage("en")}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            simChatLanguage === "en" ? "bg-amber-400 text-black" : "text-slate-400"
+                          }`}
+                        >
+                          English
+                        </button>
+                        <button
+                          onClick={() => setSimChatLanguage("ur")}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            simChatLanguage === "ur" ? "bg-amber-400 text-black" : "text-slate-400"
+                          }`}
+                        >
+                          اردو
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+                      {simChatLanguage === "en" ? (
+                        <>
+                          <div className="flex justify-end">
+                            <div className="max-w-xs px-4 py-2.5 rounded-2xl bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs">
+                              Hi! Where is my order #DFTE-8921?
+                            </div>
+                          </div>
+                          <div className="flex justify-start">
+                            <div className="max-w-xs px-4 py-2.5 rounded-2xl bg-white/10 border border-white/10 text-slate-200 text-xs space-y-1">
+                              <p className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                                <Bot className="w-3.5 h-3.5" />
+                                Digital FTE Support Agent
+                              </p>
+                              <p>Hello! Order #DFTE-8921 was fulfilled 3 hours ago via Express Logistics. Tracking: <span className="text-amber-300 font-mono">TRK-98124</span>. Expected arrival: Tomorrow by 2 PM!</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-start" dir="rtl">
+                            <div className="max-w-xs px-4 py-2.5 rounded-2xl bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs font-sans">
+                              السلام علیکم! میرا آرڈر #DFTE-8921 کب تک پہنچے گا؟
+                            </div>
+                          </div>
+                          <div className="flex justify-end" dir="rtl">
+                            <div className="max-w-xs px-4 py-2.5 rounded-2xl bg-white/10 border border-white/10 text-slate-200 text-xs space-y-1 font-sans">
+                              <p className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                                <Bot className="w-3.5 h-3.5" />
+                                ڈیجیٹل FTE سپورٹ ایجنٹ
+                              </p>
+                              <p>وعلیکم السلام! آپ کا آرڈر #DFTE-8921 کوریئر کو روانہ کر دیا گیا ہے۔ ٹریکنگ نمبر: <span className="text-amber-300 font-mono">TRK-98124</span> ہے۔ کل دوپہر 2 بجے تک موصول ہو جائے گا!</p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
+
+            {/* 4. QUANTIFIABLE IMPACT & METRICS */}
+            <div className="py-8 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {[
+                { val: "< 1.2s", label: "Chatbot Response Time", sub: "Fastest in e-commerce" },
+                { val: "10x", label: "Content Creation Speed", sub: "Gemini 2.5 studio" },
+                { val: "15+ Hrs", label: "Saved Weekly / Store", sub: "Zero manual admin" },
+                { val: "99.9%", label: "Real-Time Sync Uptime", sub: "Redis event streams" },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className="p-6 rounded-3xl bg-[#07111d]/90 border border-white/10 text-center space-y-2 hover:border-amber-400/40 transition-all"
+                >
+                  <p className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-300 font-mono">
+                    {stat.val}
+                  </p>
+                  <p className="text-xs sm:text-sm font-bold text-white">{stat.label}</p>
+                  <p className="text-[10px] text-slate-400">{stat.sub}</p>
+                </div>
+              ))}
+            </div>
+
+
+
+            {/* 6. FREQUENTLY ASKED QUESTIONS */}
+            <div id="faq" className="py-8 space-y-8 max-w-3xl mx-auto w-full">
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  Common Questions
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                  Frequently Asked Questions
+                </h2>
+                <p className="text-slate-400 text-sm">
+                  Everything you need to know about setting up your autonomous AI employee.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    q: "Is it safe to connect my Shopify or WooCommerce store?",
+                    a: "Yes, 100%. Digital FTE connects via official OAuth API keys with read-only scopes by default. All access tokens are encrypted with AES-256 / Fernet key derivation, and your data is never used to train public AI models."
+                  },
+                  {
+                    q: "How does the bilingual support (English & Urdu) work?",
+                    a: "Our customer support agent detects the language of incoming visitor messages automatically. Whether a customer types in formal English, Roman Urdu, or standard Urdu script, the AI resolves their order status and questions accurately in the same language."
+                  },
+                  {
+                    q: "Can I review AI-generated posts and replies before they publish?",
+                    a: "Absolutely. You have total control: you can keep any agent in 'Human-in-the-Loop' mode where drafts require one-click approval, or toggle into full autonomous autopilot once you trust the brand voice."
+                  },
+                  {
+                    q: "Do I need a credit card to start the free trial?",
+                    a: "No credit card is required. You get 14 days of full access to explore the dashboard, test the AI agents, and connect your store with zero financial obligation."
+                  },
+                  {
+                    q: "Can I cancel or change my plan anytime?",
+                    a: "Yes. There are no contracts or long-term lock-ins. You can upgrade, downgrade, or cancel your subscription with a single click from the Settings tab."
+                  }
+                ].map((faq, idx) => {
+                  const isOpen = landingFaqOpen === idx;
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-white/10 bg-[#07111d]/90 p-5 cursor-pointer transition-all hover:border-amber-400/30"
+                      onClick={() => setLandingFaqOpen(isOpen ? null : idx)}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <h4 className="text-sm sm:text-base font-bold text-white">{faq.q}</h4>
+                        <ChevronDown
+                          className={`w-4 h-4 text-amber-400 shrink-0 transition-transform duration-200 ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </div>
+                      {isOpen && (
+                        <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed pt-3 border-t border-white/5 animate-fade-in">
+                          {faq.a}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+
 
           </div>
         ) : (
@@ -1853,12 +2268,12 @@ export default function AuthPage() {
                   <span className="font-bold text-lg text-white">Digital FTE</span>
                 </div>
                 <h2 className="text-3xl font-extrabold text-violet-950 tracking-tight">
-                  {authMode === "signin" ? "Welcome back" : "Start free trial"}
+                  {authMode === "signin" ? t("auth.signIn") : t("auth.getStarted")}
                 </h2>
                 <p className="text-sm text-slate-500 mt-1.5">
                   {authMode === "signin" 
-                    ? "Log in to command your autonomous e-commerce workforce." 
-                    : "No credit card required. Instantly deploy your first AI employee."}
+                    ? t("auth.loginDesc")
+                    : t("auth.signupDesc")}
                 </p>
               </div>
 
@@ -1874,7 +2289,7 @@ export default function AuthPage() {
                       authMode === "signin" ? "bg-[#0d172f] text-amber-300 shadow-sm border border-amber-500/20" : "text-slate-400 hover:text-white"
                     }`}
                   >
-                    Sign In
+                    {t("auth.signIn")}
                   </button>
                   <button
                     type="button"
@@ -1886,7 +2301,7 @@ export default function AuthPage() {
                       authMode === "signup" ? "bg-[#0d172f] text-amber-300 shadow-sm border border-amber-500/20" : "text-slate-400 hover:text-white"
                     }`}
                   >
-                    Create Account
+                    {t("auth.signUp")}
                   </button>
                 </div>
 
@@ -1902,7 +2317,7 @@ export default function AuthPage() {
                     ) : (
                       <>
                         <Chrome className="w-5 h-5 text-[#4285F4] shrink-0 group-hover:scale-110 transition-transform" />
-                        <span className="flex-1">Continue with Google</span>
+                        <span className="flex-1">{t("auth.continueGoogle")}</span>
                         <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </>
                     )}
@@ -1911,13 +2326,13 @@ export default function AuthPage() {
 
                 <div className="relative flex py-2 items-center mb-6">
                   <div className="flex-grow border-t border-slate-100"></div>
-                  <span className="flex-shrink mx-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider">Or connect via email</span>
+                  <span className="flex-shrink mx-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t("auth.orContinueWith")}</span>
                   <div className="flex-grow border-t border-slate-100"></div>
                 </div>
 
                 <form onSubmit={handleAuthSubmit} className="space-y-4">
                   <div className={`transition-all duration-300 overflow-hidden ${authMode === "signup" ? "max-h-[85px] opacity-100 mb-4" : "max-h-0 opacity-0 pointer-events-none"}`}>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">Full Name</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">{t("auth.fullNameLabel")}</label>
                     <div className="relative rounded-xl shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <User className={`w-4 h-4 transition-colors ${isFullNameFocused ? "text-violet-600" : "text-slate-400"}`} />
@@ -1929,13 +2344,13 @@ export default function AuthPage() {
                         onFocus={() => setIsFullNameFocused(true)}
                         onBlur={() => setIsFullNameFocused(false)}
                         className="block w-full pl-10 pr-3.5 py-3 bg-white/5 border border-white/10 focus:border-amber-400 focus:bg-white/10 focus:ring-amber-400/20 outline-none rounded-xl text-white placeholder-slate-500 text-sm transition-all duration-300"
-                        placeholder="John Doe"
+                        placeholder={t("auth.fullNamePlaceholder")}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">Email Address</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">{t("auth.emailLabel")}</label>
                     <div className="relative rounded-xl shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <Mail className={`w-4 h-4 transition-colors ${isEmailFocused ? "text-violet-600" : "text-slate-400"}`} />
@@ -1948,14 +2363,14 @@ export default function AuthPage() {
                         onFocus={() => setIsEmailFocused(true)}
                         onBlur={() => setIsEmailFocused(false)}
                         className="block w-full pl-10 pr-3.5 py-3 bg-white/5 border border-white/10 focus:border-amber-400 focus:bg-white/10 focus:ring-amber-400/20 outline-none rounded-xl text-white placeholder-slate-500 text-sm transition-all duration-300"
-                        placeholder="founder@mystore.com"
+                        placeholder={t("auth.emailPlaceholder")}
                       />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Password</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">{t("auth.passwordLabel")}</label>
                       {authMode === "signin" && (
                         <button
                           type="button"
@@ -1965,7 +2380,7 @@ export default function AuthPage() {
                           }}
                           className="text-xs font-bold text-violet-600 hover:text-violet-800 transition-colors cursor-pointer"
                         >
-                          Forgot Password?
+                          {t("auth.forgotPassword")}
                         </button>
                       )}
                     </div>
@@ -2009,7 +2424,7 @@ export default function AuthPage() {
                       <div className="w-5 h-5 rounded-full border-2 border-[#06111b] border-t-transparent animate-spin" />
                     ) : (
                       <>
-                        <span>{authMode === "signin" ? "Login to Dashboard" : "Start 7-Day Free Trial"}</span>
+                        <span>{authMode === "signin" ? t("auth.signIn") : t("pricing.trialBtn")}</span>
                         <ArrowRight className="w-4 h-4 text-[#06111b]" />
                       </>
                     )}
@@ -2020,22 +2435,22 @@ export default function AuthPage() {
               <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
                 {authMode === "signin" ? (
                   <p>
-                    Don't have an account?{" "}
+                    {t("auth.noAccount")} {" "}
                     <button
                       onClick={() => setAuthMode("signup")}
                       className="text-amber-300 font-bold hover:underline cursor-pointer"
                     >
-                      Sign up for Free Trial
+                      {t("auth.signUpLink")}
                     </button>
                   </p>
                 ) : (
                   <p>
-                    Already have an account?{" "}
+                    {t("auth.haveAccount")} {" "}
                     <button
                       onClick={() => setAuthMode("signin")}
                       className="text-amber-300 font-bold hover:underline cursor-pointer"
                     >
-                      Login to Dashboard
+                      {t("auth.signInLink")}
                     </button>
                   </p>
                 )}
@@ -2048,16 +2463,6 @@ export default function AuthPage() {
               <div className="absolute top-12 right-12 w-6 h-6 rounded-full bg-amber-300/30 blur-md animate-pulse" />
               <div className="absolute top-1/3 -right-32 w-[500px] h-[500px] rounded-full bg-violet-400/08 blur-3xl animate-pulse-slow" />
 
-              <div className="absolute bottom-8 left-6 md:bottom-12 md:left-12 z-20 max-w-[210px] sm:max-w-[240px] bg-[#081827]/95 backdrop-blur-lg p-4 rounded-2xl border border-white/10 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-float-delayed">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-                  <span className="text-[10px] font-bold text-amber-200 tracking-wider uppercase">FTE-01 ACTIVE</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-slate-300 font-semibold italic">
-                  "Working 24/7 to sync catalogs, capture customers, and scale e-commerce revenues."
-                </p>
-              </div>
-
               <div className="relative w-full flex items-center justify-center my-6 z-30">
                 <div className="absolute w-64 h-64 bg-gradient-to-r from-violet-400/20 to-indigo-400/20 rounded-full blur-2xl animate-pulse-slow" />
                 <InteractiveRobot 
@@ -2065,18 +2470,9 @@ export default function AuthPage() {
                   isPasswordFocused={isPasswordFocused} 
                   isPasswordVisible={isPasswordVisible} 
                   isFullNameFocused={isFullNameFocused}
+                  orbitItemScale={1.25}
+                  visualScale={0.82}
                 />
-              </div>
-
-              <div className="text-center max-w-sm mt-2 z-20 hover:scale-105 transition-transform duration-300">
-                <h3 className="text-lg font-bold text-amber-300">AI Employee Onboarding</h3>
-                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-                  👁️ Focus on fields to interact with robot. 🔒 Hide password for encryption mode.
-                </p>
-              </div>
-
-              <div className="absolute top-6 right-6 z-20 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-[10px] font-bold text-emerald-700 tracking-wide">
-                ✅ Encrypted end-to-end
               </div>
             </div>
           </div>
@@ -2380,9 +2776,17 @@ export default function AuthPage() {
       )}
 
       {/* FOOTER */}
-      <footer id="app-footer" className="mt-auto py-6 text-center text-xs text-slate-400 border-t border-white/10 bg-[#02040d]/60">
-        <p>© 2026 Digital FTE. Empowering 24/7 E-Commerce growth with secure, autonomous AI employee containers.</p>
-      </footer>
+      {currentView === "landing" && !authenticatedUser ? (
+        <Footer />
+      ) : (
+        <footer id="app-footer" className="mt-auto border-t border-amber-400/20 bg-[#02040d]/70 py-7 text-center">
+          <p className="px-4 text-sm font-semibold leading-relaxed tracking-wide text-white sm:text-base">
+            <span className="text-amber-300">© 2026 Digital FTE</span>
+            <span className="mx-2 text-white/60">•</span>
+            {t("footer.description")}
+          </p>
+        </footer>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useLanguage } from "../lib/LanguageContext";
 
 interface RobotProps {
   isEmailFocused?: boolean;
@@ -13,6 +14,9 @@ interface RobotProps {
   showOrbitItems?: boolean;
   showRightArm?: boolean;
   motionPaused?: boolean;
+  orbitRadiusX?: number;
+  orbitItemScale?: number;
+  visualScale?: number;
 }
 
 const ORBIT_ITEMS = [
@@ -33,8 +37,12 @@ export function InteractiveRobot({
   showWelcome = false,
   showOrbitItems = true,
   showRightArm = true,
-  motionPaused = false
+  motionPaused = false,
+  orbitRadiusX = 160,
+  orbitItemScale = 1,
+  visualScale = 1
 }: RobotProps) {
+  const { t } = useLanguage();
   const robotRef = useRef<HTMLDivElement>(null);
   const [pupilOffset, setPupilOffset] = useState({ x: 0, y: 0 });
   const [headTransform, setHeadTransform] = useState({ rx: 0, ry: 0, tx: 0, ty: 0 });
@@ -113,13 +121,13 @@ export function InteractiveRobot({
 
   let speechText = "";
   if (showWelcome) {
-    speechText = "Welcome! Let's grow your store together! 👋";
+    speechText = t("robot.messages.welcome");
   } else if (isEmailFocused) {
-    speechText = "I see your email! 👀";
+    speechText = t("robot.messages.email");
   } else if (isPasswordFocused) {
-    speechText = isPasswordVisible ? "Oh, visible! 🙈" : "Security first! 🔒";
+    speechText = isPasswordVisible ? t("robot.messages.visible") : t("robot.messages.security");
   } else if (isFullNameFocused) {
-    speechText = "Awesome name! ✨";
+    speechText = t("robot.messages.name");
   }
 
   const isBadgeInFront = (index: number) => {
@@ -128,13 +136,20 @@ export function InteractiveRobot({
   };
 
   const renderBadge = (item: (typeof ORBIT_ITEMS)[number], index: number) => {
+    const labelKey = {
+      Inventory: "robot.orbit.inventory",
+      "Social Media": "robot.orbit.social",
+      "Auto Reply": "robot.orbit.reply",
+      "AI Images": "robot.orbit.images",
+      Analytics: "robot.orbit.analytics",
+    }[item.label];
     const angleDeg = (orbitAngle + index * (360 / ORBIT_ITEMS.length)) % 360;
     const angleRad = (angleDeg * Math.PI) / 180;
-    const radiusX = 170;
+    const radiusX = orbitRadiusX;
     const radiusY = 50;
     const x = Math.cos(angleRad) * radiusX;
     const y = Math.sin(angleRad) * radiusY;
-    const scale = Number((0.85 + (y / radiusY) * 0.15).toFixed(4));
+  const scale = Number(((0.85 + (y / radiusY) * 0.15) * orbitItemScale).toFixed(4));
     const opacity = Number((0.5 + (y / radiusY + 1) * 0.25).toFixed(4));
 
     return (
@@ -151,7 +166,7 @@ export function InteractiveRobot({
       >
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
-          <span>{item.label}</span>
+          <span>{labelKey ? t(labelKey) : item.label}</span>
         </div>
       </div>
     );
@@ -162,6 +177,7 @@ export function InteractiveRobot({
       ref={robotRef} 
       className={`relative w-full h-full ${compact ? "min-h-0" : "min-h-[480px] md:min-h-[580px]"} flex items-center justify-center select-none overflow-visible`}
       style={{
+        transform: `scale(${visualScale})`,
         perspective: "1000px",
         height: compact ? "100%" : undefined,
         minHeight: compact ? 0 : undefined,

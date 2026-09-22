@@ -1,126 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { SiteNav } from "../components/SiteNav";
-import {
-  Package,
-  LineChart,
-  Sparkles,
-  Send,
-  Image as ImageIcon,
-  MessageCircle,
-  MessagesSquare,
-  Megaphone,
-  ArrowRight,
-  CheckCircle2,
-  Clock,
-  Zap,
+import { Footer } from "../components/Footer";
+import { 
+  Sparkles, 
+  Bot, 
+  ShieldCheck, 
+  ArrowRight, 
+  Users, 
+  Globe2, 
+  Cpu, 
+  HeartHandshake,
+  Zap
 } from "lucide-react";
 
-const categories = ["All", "Operations", "Marketing", "Engagement"];
-
-const features = [
-  {
-    title: "Inventory Management",
-    category: "Operations",
-    desc: "Manage stock, sync catalogs, and automate replenishment checks in real time.",
-    icon: Package,
-    badge: "Saves 5 hrs/wk",
-    preview: "Real-time stock sync active",
-  },
-  {
-    title: "Revenue Dashboard",
-    category: "Operations",
-    desc: "See your sales, order volume, and revenue trends without manual reporting.",
-    icon: LineChart,
-    badge: "Instant Metrics",
-    preview: "Automated daily P&L reports",
-  },
-  {
-    title: "Caption Generation",
-    category: "Marketing",
-    desc: "Create social captions, product descriptions and ad copy instantly.",
-    icon: Sparkles,
-    badge: "10x Faster",
-    preview: "AI copy crafted in 2 seconds",
-  },
-  {
-    title: "Social Posting",
-    category: "Marketing",
-    desc: "Publish 1-2 high-quality social posts per day across your connected channels.",
-    icon: Send,
-    badge: "24/7 Active",
-    preview: "Auto-scheduled post queues",
-  },
-  {
-    title: "Image Generation",
-    category: "Marketing",
-    desc: "Generate product and lifestyle images using AI guidance for better engagement.",
-    icon: ImageIcon,
-    badge: "Studio Quality",
-    preview: "4K lifestyle render engine",
-  },
-  {
-    title: "Chatbot Integration",
-    category: "Engagement",
-    desc: "Handle customer messages and auto-reply to comments from one dashboard.",
-    icon: MessageCircle,
-    badge: "< 1s Response",
-    preview: "Instant order lookup AI",
-  },
-  {
-    title: "Comment Insights",
-    category: "Engagement",
-    desc: "Show comments in a dashboard and reply automatically to keep conversations moving.",
-    icon: MessagesSquare,
-    badge: "Zero Spam",
-    preview: "Sentiment filtering engine",
-  },
-  {
-    title: "@all Support",
-    category: "Engagement",
-    desc: "Trigger broad social engagement commands and manage audience interactions faster.",
-    icon: Megaphone,
-    badge: "High Reach",
-    preview: "Bulk community broadcaster",
-  },
-];
-
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
-const container: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-export default function FeaturesPage() {
-  const [activeCategory, setActiveCategory] = useState("All");
-
-  const filteredFeatures =
-    activeCategory === "All"
-      ? features
-      : features.filter((f) => f.category === activeCategory);
-
+export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#02040d] text-white relative overflow-hidden select-none">
+    <div className="min-h-screen bg-[#02040d] text-white relative overflow-hidden selection:bg-amber-400 selection:text-black">
       {/* Background Glows */}
-      <motion.div
-        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-amber-500/10 rounded-full blur-3xl"
-        animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.05, 1] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div className="pointer-events-none absolute top-1/2 -right-40 w-[500px] h-[500px] bg-yellow-500/5 rounded-full blur-3xl" />
-
-      {/* Grid Texture */}
+      <div className="pointer-events-none fixed -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-amber-500/10 rounded-full blur-[120px]" />
+      
+      {/* Grid Pattern */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.12]"
+        className="pointer-events-none fixed inset-0 opacity-[0.12]"
         style={{
           backgroundImage: "radial-gradient(rgba(251,191,36,0.35) 1px, transparent 1px)",
           backgroundSize: "36px 36px",
@@ -128,189 +33,187 @@ export default function FeaturesPage() {
         }}
       />
 
-      {/* Fixed Sticky Header */}
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#04090f]/90 backdrop-blur-xl px-6 sm:px-12 py-4 flex items-center justify-between"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-[#06111b] font-bold shadow-lg shadow-amber-500/20">
+      {/* FIXED NAVBAR */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#04090f]/90 backdrop-blur-xl px-6 sm:px-12 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-[#06111b] font-extrabold shadow-lg shadow-amber-500/20">
             FTE
           </div>
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-white">Digital FTE</h1>
             <p className="text-[10px] font-bold text-amber-300 tracking-widest uppercase">AI E-Commerce Employee</p>
           </div>
-        </div>
+        </Link>
+
         <SiteNav />
-      </motion.header>
 
-      <main className="max-w-6xl mx-auto px-6 sm:px-12 pt-32 pb-20 relative z-10">
-        {/* Hero Section */}
-        <motion.section initial="hidden" animate="show" variants={container} className="text-center mb-12">
-          <motion.p
-            variants={fadeUp}
-            className="text-xs font-bold text-amber-300 tracking-widest uppercase bg-amber-500/10 border border-amber-500/20 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full cursor-default"
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="px-4 py-2 text-sm font-bold rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-[#06111b] shadow-md shadow-amber-500/20 hover:shadow-lg transition-all"
           >
-            <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            Autonomous Platform Capabilities
-          </motion.p>
-          <motion.h2 variants={fadeUp} className="mt-6 text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            AI features built for modern
-            <br className="hidden sm:block" /> e-commerce teams
-          </motion.h2>
-          <motion.p variants={fadeUp} className="mt-5 text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Digital FTE brings inventory automation, social media content, revenue insights,
-            chatbot replies and comment management together in one AI-powered employee.
-          </motion.p>
-        </motion.section>
+            Get Started
+          </Link>
+        </div>
+      </header>
 
-        {/* Category Filter Tabs */}
-        <motion.div
+      {/* MAIN CONTENT */}
+      <main className="pt-32 pb-20 px-6 sm:px-12 max-w-6xl mx-auto relative z-10">
+        
+        {/* Hero Banner */}
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex flex-wrap items-center justify-center gap-2 mb-12"
-        >
-          {categories.map((cat) => {
-            const isActive = activeCategory === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className="relative px-4 py-2 rounded-full text-xs font-bold transition-colors duration-200"
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeFeatureTab"
-                    className="absolute inset-0 bg-amber-400 rounded-full shadow-lg shadow-amber-500/20"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className={`relative z-10 ${isActive ? "text-[#06111b]" : "text-slate-400"}`}>
-                  {cat}
-                </span>
-              </button>
-            );
-          })}
-        </motion.div>
-
-        {/* Features Grid with Scroll Trigger Reveal */}
-        <motion.div
-          layout
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={container}
-          className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 min-h-[400px]"
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredFeatures.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <motion.div
-                  layout
-                  key={feature.title}
-                  variants={fadeUp}
-                  initial={{ opacity: 0, y: 35 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
-                  className="rounded-3xl border border-white/10 bg-[#071121]/90 backdrop-blur-xl p-6 shadow-2xl flex flex-col justify-between relative overflow-hidden"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                        <Icon className="w-5 h-5" strokeWidth={2} />
-                      </div>
-
-                      <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-amber-400" />
-                        {feature.badge}
-                      </span>
-                    </div>
-
-                    <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-sm text-slate-400 leading-relaxed">{feature.desc}</p>
-                  </div>
-
-                  {/* Status Indicator */}
-                  <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] text-slate-400">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                    </span>
-                    <span>{feature.preview}</span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Scroll-Triggered Value Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mt-20 rounded-3xl border border-white/10 bg-gradient-to-br from-[#06111d] to-[#0a1626] p-8 sm:p-10 shadow-2xl relative overflow-hidden"
-        >
-          <span className="text-[11px] font-bold text-amber-400 tracking-widest uppercase">Value Proposition</span>
-          <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white">Why this matters for your store</h3>
-          <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed max-w-3xl">
-            Your store gets an autonomous AI employee that reduces manual work, keeps inventory
-            accurate, engages customers, and builds revenue with social media workflow automation.
-          </p>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="rounded-2xl border border-white/10 bg-slate-950/60 p-5 flex items-start gap-3"
-            >
-              <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Automate daily e-commerce operations and free your team to focus on high-impact growth strategies.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="rounded-2xl border border-white/10 bg-slate-950/60 p-5 flex items-start gap-3"
-            >
-              <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Consolidate social media, inventory checks, chatbot replies, and revenue reporting into one single AI system.
-              </p>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Scroll-Triggered CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
           transition={{ duration: 0.5 }}
-          className="mt-16 text-center"
+          className="text-center max-w-3xl mx-auto mb-20"
         >
-          <Link
-            href="/pricing"
-            className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-8 py-3.5 text-sm font-bold text-[#06111b] hover:bg-amber-300 transition-colors shadow-lg shadow-amber-500/10"
-          >
-            <span>View Pricing Plans</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-4">
+            <Sparkles className="w-4 h-4" />
+            Our Vision & Mission
+          </div>
+          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
+            Pioneering the World's First <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500">Autonomous AI Employee</span> for E-Commerce.
+          </h1>
+          <p className="mt-6 text-slate-300 text-base sm:text-lg leading-relaxed">
+            Online merchants shouldn't have to spend 14 hours a day juggling 7 different browser tabs, checking inventory, drafting social posts, and answering repetitious messages. We engineered <strong className="text-white">Digital FTE</strong> to solve e-commerce founder burnout forever.
+          </p>
         </motion.div>
+
+        {/* 3 Pillar Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+          <div className="p-8 rounded-3xl bg-[#07111d]/90 border border-white/10 backdrop-blur-sm relative group hover:border-amber-400/40 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6">
+              <Bot className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Not a Tool. An Employee.</h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Traditional SaaS apps require you to do the work. Digital FTE is an autonomous agentic system that proactively executes tasks, monitors stock, and publishes marketing on autopilot.
+            </p>
+          </div>
+
+          <div className="p-8 rounded-3xl bg-[#07111d]/90 border border-white/10 backdrop-blur-sm relative group hover:border-violet-400/40 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 mb-6">
+              <Cpu className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Multi-Agent Architecture</h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Seven specialized AI agents work in unison: Inventory Sync, Content Studio, Social Scheduler, Comment Engagement, Bilingual Support, Analytics Rollup, and Orchestrator.
+            </p>
+          </div>
+
+          <div className="p-8 rounded-3xl bg-[#07111d]/90 border border-white/10 backdrop-blur-sm relative group hover:border-emerald-400/40 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
+              <Globe2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Bilingual by Design</h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Built for modern international commerce with native bilingual support in English and Urdu, enabling frictionless customer communication across regional and global markets.
+            </p>
+          </div>
+        </div>
+
+        {/* The Digital FTE Story */}
+        <div className="bg-[#07111d]/95 border border-white/10 rounded-3xl p-8 sm:p-12 mb-20 relative overflow-hidden">
+          <div className="max-w-3xl">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-widest block mb-2">Our Origin</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-6">
+              Why We Built Digital FTE
+            </h2>
+            <div className="space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed">
+              <p>
+                Every growing e-commerce store hits the same invisible ceiling. As order volumes increase, store owners find themselves bogged down in low-level administrative churn: manual catalog synchronization, crafting endless daily social media captions, handling repetitive order tracking messages, and recalculating daily P&L.
+              </p>
+              <p>
+                Hiring a human full-time employee for each of these tasks costs thousands of dollars a month and requires constant supervision. Existing software plugins only created more disconnected dashboards.
+              </p>
+              <p>
+                We asked a simple question: <strong className="text-white">What if you could hire a single digital employee that never sleeps, never forgets stock levels, generates studio-grade social posts, and talks to customers 24/7?</strong>
+              </p>
+              <p>
+                That is <span className="text-amber-300 font-semibold">Digital FTE</span>. Powered by FastAPI, Google Gemini 2.5, and resilient Redis event streams, our platform acts as your tireless co-pilot, driving growth while giving you your time back.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Core Principles */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Our Engineering Principles</h2>
+            <p className="text-sm text-slate-400 mt-2">What sets our autonomous systems apart</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-4">
+              <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0 mt-1" />
+              <div>
+                <h4 className="text-base font-bold text-white">Data Sovereignty & Privacy First</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Your store catalog and customer metrics are strictly confidential. We enforce a zero public training policy with enterprise LLM providers.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-4">
+              <HeartHandshake className="w-6 h-6 text-amber-400 shrink-0 mt-1" />
+              <div>
+                <h4 className="text-base font-bold text-white">Human-in-the-Loop Safeguards</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  You stay in command. Keep any agent in autonomous autopilot or require one-click approval before posts or inventory updates go live.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-4">
+              <Zap className="w-6 h-6 text-yellow-400 shrink-0 mt-1" />
+              <div>
+                <h4 className="text-base font-bold text-white">Sub-Second Execution Speed</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Built on high-performance asynchronous Python FastAPI and Redis streams for real-time customer support response in under 1.2 seconds.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-4">
+              <Users className="w-6 h-6 text-blue-400 shrink-0 mt-1" />
+              <div>
+                <h4 className="text-base font-bold text-white">Built For Real Store Owners</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  No complex coding or prompt engineering needed. Connect your Shopify or WooCommerce store in 60 seconds and let the AI do the heavy lifting.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA Box */}
+        <div className="text-center p-10 rounded-3xl bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border border-amber-400/30">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
+            Ready to hire your first AI Employee?
+          </h3>
+          <p className="text-sm text-slate-300 max-w-xl mx-auto mb-6">
+            Join forward-thinking e-commerce brands automating their stores with Digital FTE today.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-[#06111b] font-bold text-sm hover:shadow-xl hover:shadow-amber-500/20 transition-all flex items-center gap-2"
+            >
+              <span>Start Free 14-Day Trial</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/contact"
+              className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all"
+            >
+              Talk to Our Team
+            </Link>
+          </div>
+        </div>
+
       </main>
+
+      <Footer />
     </div>
   );
 }
