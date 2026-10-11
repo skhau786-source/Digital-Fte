@@ -15,7 +15,7 @@ export const translations = {
 
     // ─── Header / Branding ────────────────────────────────────────────────────
     brand: {
-      name: "Digital FTE",
+      name: "AUTO-FTE",
       tagline: "E-Commerce Autonomous AI",
       taglineShort: "AI E-Commerce Employee",
       aiEmployee: "AI EMPLOYEE",
@@ -35,7 +35,7 @@ export const translations = {
     // ─── Homepage Hero ────────────────────────────────────────────────────────
     hero: {
       badge: "AI-Powered E-Commerce Employee",
-      headline1: "Your AI Digital FTE,",
+      headline1: "Your AI AUTO-FTE,",
       headline2: "Working 24/7 For",
       headline3: "Your Store.",
       subheadline:
@@ -56,7 +56,7 @@ export const translations = {
     features: {
       badge: "Autonomous Platform Capabilities",
       headline: "AI features built for modern e-commerce teams",
-      sub: "Digital FTE brings inventory automation, social media content, revenue insights, chatbot replies and comment management together in one AI-powered employee.",
+      sub: "AUTO-FTE brings inventory automation, social media content, revenue insights, chatbot replies and comment management together in one AI-powered employee.",
       valueTitle: "Value Proposition",
       whyMatters: "Why this matters for your store",
       whyDesc:
@@ -268,6 +268,7 @@ export const translations = {
     dashboard: {
       tabs: {
         dashboard: "Dashboard",
+        agents: "AI Agents",
         inventory: "Inventory",
         social: "Social Media",
         customers: "Customers",
@@ -277,6 +278,7 @@ export const translations = {
       },
       titles: {
         dashboard: "📊 Dashboard",
+        agents: "🤖 AI Agents & Orchestrator",
         inventory: "📦 Inventory Management",
         social: "📱 Social Media",
         customers: "💬 Customers",
@@ -383,6 +385,23 @@ export const translations = {
         name: 'FTE-01 "Apex"',
         online: "Online",
         aiPower: "AI Power",
+      },
+      agents: {
+        title: "AI Agents Command Center",
+        badge: "Autonomous Workforce",
+        orchestratorOnline: "AI Orchestrator Online",
+        auditActive: "FTE Live Audit Loop Active",
+        launchSync: "Launch Autonomous Sync",
+        launching: "Launching...",
+        connectedStore: "Connected Store",
+        running: "Running...",
+        runAgent: "Run Agent",
+        terminalTitle: "Live Execution Terminal",
+        terminalWaiting: "Click 'Run Agent' on any AI worker above to watch execution...",
+        settingsTitle: "Autopilot & Review Settings",
+        manualReviewLabel: "Manual Review Mode (Human-in-the-Loop)",
+        manualReviewDesc: "Require merchant approval before publishing social posts or messages.",
+        operatingHours: "Operating Hours Window",
       },
       logout: "Logout",
     },
@@ -560,7 +579,7 @@ export const translations = {
     },
 
     brand: {
-      name: "ڈیجیٹل FTE",
+      name: "AUTO-FTE",
       tagline: "ای کامرس خودمختار AI",
       taglineShort: "AI ای کامرس ملازم",
       aiEmployee: "AI ملازم",
@@ -578,7 +597,7 @@ export const translations = {
 
     hero: {
       badge: "AI سے چلنے والا ای کامرس ملازم",
-      headline1: "آپ کا AI ڈیجیٹل FTE،",
+      headline1: "آپ کا AI AUTO-FTE،",
       headline2: "آپ کے اسٹور کے لیے",
       headline3: "24/7 کام کرتا ہے۔",
       subheadline:
@@ -598,7 +617,7 @@ export const translations = {
     features: {
       badge: "خودمختار پلیٹ فارم کی صلاحیتیں",
       headline: "جدید ای کامرس ٹیموں کے لیے AI خصوصیات",
-      sub: "ڈیجیٹل FTE انوینٹری آٹومیشن، سوشل میڈیا مواد، آمدنی کی بصیرت، چیٹ بوٹ جوابات اور تبصرہ انتظام کو ایک AI سے چلنے والے ملازم میں یکجا کرتا ہے۔",
+      sub: "AUTO-FTE انوینٹری آٹومیشن، سوشل میڈیا مواد، آمدنی کی بصیرت، چیٹ بوٹ جوابات اور تبصرہ انتظام کو ایک AI سے چلنے والے ملازم میں یکجا کرتا ہے۔",
       valueTitle: "قدری تجویز",
       whyMatters: "آپ کے اسٹور کے لیے یہ کیوں اہم ہے",
       whyDesc:
@@ -806,6 +825,7 @@ export const translations = {
     dashboard: {
       tabs: {
         dashboard: "ڈیش بورڈ",
+        agents: "اے آئی ایجنٹس",
         inventory: "انوینٹری",
         social: "سوشل میڈیا",
         customers: "گاہک",
@@ -815,6 +835,7 @@ export const translations = {
       },
       titles: {
         dashboard: "📊 ڈیش بورڈ",
+        agents: "🤖 اے آئی ایجنٹس اور آرکیسٹریٹر",
         inventory: "📦 انوینٹری مینجمنٹ",
         social: "📱 سوشل میڈیا",
         customers: "💬 گاہک",
@@ -921,6 +942,23 @@ export const translations = {
         name: 'FTE-01 "Apex"',
         online: "آن لائن",
         aiPower: "AI طاقت",
+      },
+      agents: {
+        title: "اے آئی ایجنٹس کمانڈ سینٹر",
+        badge: "خود مختار ورک فورس",
+        orchestratorOnline: "اے آئی آرکیسٹریٹر آن لائن",
+        auditActive: "لائیو آڈٹ لوپ فعال ہے",
+        launchSync: "خود مختار سنک شروع کریں",
+        launching: "شروع ہو رہا ہے...",
+        connectedStore: "منسلک اسٹور",
+        running: "چل رہا ہے...",
+        runAgent: "ایجنٹ چلائیں",
+        terminalTitle: "لائیو ایگزیکیوشن ٹرمینل",
+        terminalWaiting: "ایگزیکیوشن دیکھنے کے لیے اوپر کسی بھی ایجنٹ پر 'ایجنٹ چلائیں' کلک کریں...",
+        settingsTitle: "آٹو پائلٹ اور منظوری کی ترتیبات",
+        manualReviewLabel: "دستی منظوری موڈ (ہیومن ان دی لوپ)",
+        manualReviewDesc: "سوشل پوسٹس شائع کرنے سے پہلے دکاندار کی منظوری درکار ہے۔",
+        operatingHours: "کام کے اوقات کا دورانیہ",
       },
       logout: "لاگ آؤٹ",
     },

@@ -171,37 +171,71 @@ class CustomerSupportHandler:
 
         # Score matching products by token overlap
         tokens = set(re.findall(r"\b\w{3,}\b", query.lower()))
+        is_catalog_query = any(
+            w in query.lower()
+            for w in [
+                "product",
+                "products",
+                "catalog",
+                "stock",
+                "inventory",
+                "price",
+                "prices",
+                "store",
+                "what do you sell",
+                "what is available",
+                "all items",
+            ]
+        )
         scored = []
         for p in products:
             title_tokens = set(re.findall(r"\b\w{3,}\b", (p.title or "").lower()))
             desc_tokens = set(re.findall(r"\b\w{3,}\b", (p.description or "").lower()))
             score = len(tokens & title_tokens) * 3 + len(tokens & desc_tokens)
-            if score > 0 or not tokens:
+            if score > 0 or not tokens or is_catalog_query:
                 # Fetch variants
                 var_res = await self.db.execute(
                     select(Variant).where(Variant.product_id == p.id)
                 )
                 variants = var_res.scalars().all()
-                scored.append({"product": p, "variants": variants, "score": score})
+                scored.append({"product": p, "variants": variants, "score": max(score, 1 if is_catalog_query else 0)})
 
         scored.sort(key=lambda x: x["score"], reverse=True)
         top_matches = scored[: self.settings.MAX_RAG_PRODUCTS]
 
         if not top_matches:
-            # Fallback to the first product if general inquiry
-            p = products[0]
-            var_res = await self.db.execute(
-                select(Variant).where(Variant.product_id == p.id)
-            )
-            top_matches = [{"product": p, "variants": var_res.scalars().all(), "score": 0}]
+            if language == "ur":
+                return "معذرت، مجھے آپ کی مطلوبہ چیز ہمارے اسٹور کیٹلاگ میں نہیں ملی۔ برائے مہربانی پراڈکٹ کا نام چیک فرمائیں۔"
+            elif language == "roman_urdu":
+                return "Maazrat, aap ki talash karda item hamare store catalog me dastyab nahi hai. Barah-e-karam product ka naam check karein."
+            else:
+                return f"I'm sorry, I couldn't find any products matching '{query}' in our store catalog. Please check the spelling or let us know if you need assistance with anything else."
 
         # Try LLM RAG with prompt
         rag_context = build_rag_context(top_matches)
         prompt = SUPPORT_QA_PROMPT.format(query=query, context=rag_context, faq_data="")
+        grounded_system = (
+            "You are the AUTO-FTE Customer Support AI Agent. "
+            "You are strictly grounded on the live PostgreSQL store database. "
+            "Answer customer inquiries using ONLY the exact product names, exact prices, and stock quantities provided in the catalog context. "
+            "Strictly prohibit generic guessing, fluff, or hallucinating products not present in the database."
+        )
         try:
-            return await self.llm.generate(prompt, system="You are a helpful customer support agent.")
+            return await self.llm.generate(prompt, system=grounded_system)
         except NotImplementedError:
             # Deterministic fallback using live catalog price/stock
+            if is_catalog_query and len(top_matches) > 1:
+                items_text = []
+                for m in top_matches:
+                    pr = m["product"]
+                    v = m["variants"]
+                    price_val = float(v[0].price) if v else 0.0
+                    stock_val = v[0].inventory_quantity if v else 0
+                    items_text.append(f"• **{pr.title}** - ${price_val:.2f} ({stock_val} units available)")
+                if language in ("roman_urdu", "urdu"):
+                    return "Hamare store par yeh products dastyab hain:\n" + "\n".join(items_text)
+                return "Here are the products currently available in our store:\n" + "\n".join(items_text)
+
             best = top_matches[0]
             prod = best["product"]
             variants = best["variants"]

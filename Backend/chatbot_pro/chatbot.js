@@ -2,8 +2,7 @@
     "use strict";
 
     const API_URL =
-        window.DFTE_PRO_CHATBOT_API ||
-        "/agent/query";
+        window.DFTE_PRO_CHATBOT_API || "/agent/query";
 
     const ROBOT_URL =
         window.DFTE_PRO_ROBOT_URL ||
@@ -18,6 +17,175 @@
             )
         ) || null;
 
+    // =========================================================
+    // UNICODE HELPER
+    // =========================================================
+
+    function U(...codes) {
+        return String.fromCodePoint(...codes);
+    }
+
+    const HAND = U(0x1F44B);
+    const ENGLISH_FLAG = U(0x1F1EC, 0x1F1E7);
+    const PAKISTAN_FLAG = U(0x1F1F5, 0x1F1F0);
+    const BULLET = U(0x25CF);
+    const CLOSE = U(0x00D7);
+    const SEND = U(0x27A4);
+
+    // =========================================================
+    // URDU TEXT
+    // =========================================================
+
+    const URDU = {
+
+        label:
+            U(
+                0x0627,
+                0x0631,
+                0x062F,
+                0x0648
+            ),
+
+        welcome:
+            U(
+                0x0633, 0x0644, 0x0627, 0x0645,
+                0x0020,
+                0x0639, 0x0644, 0x06CC, 0x06A9, 0x0645,
+                0x0021,
+                0x0020,
+                0x1F44B,
+                0x0020,
+                0x0645, 0x06CC, 0x06BA,
+                0x0020,
+                0x0622, 0x067E,
+                0x0020,
+                0x06A9, 0x0627,
+                0x0020,
+                0x0688, 0x06CC, 0x062C, 0x06CC, 0x0679, 0x0644,
+                0x0020,
+                0x0627, 0x06CC, 0x0641,
+                0x0020,
+                0x0679, 0x06CC, 0x0020,
+                0x0627, 0x06CC,
+                0x0020,
+                0x067E, 0x0631, 0x0648,
+                0x0020,
+                0x0627, 0x06CC, 0x062C, 0x0646, 0x0679,
+                0x0020,
+                0x06C1, 0x0648, 0x06BA,
+                0x06D4,
+                0x0020,
+                0x0628, 0x062A, 0x0627, 0x0626, 0x06CC, 0x06D2,
+                0x060C,
+                0x0020,
+                0x0622, 0x067E,
+                0x0020,
+                0x0627, 0x067E, 0x0646, 0x06D2
+                0x0020,
+                0x0645, 0x0646, 0x0633, 0x0644, 0x06A9,
+                0x0020,
+                0x0627, 0x0633, 0x0679, 0x0648, 0x0631,
+                0x0020,
+                0x0645, 0x06CC, 0x06BA,
+                0x0020,
+                0x06A9, 0x06CC, 0x0627,
+                0x0020,
+                0x06A9, 0x0631, 0x0648, 0x0627, 0x0646, 0x0627,
+                0x0020,
+                0x0686, 0x0627, 0x06C1, 0x062A, 0x06D2,
+                0x0020,
+                0x06C1, 0x06CC, 0x06BA,
+                0x061F
+            ),
+
+        thinking:
+            U(
+                0x0633, 0x0648, 0x0686,
+                0x0020,
+                0x0631, 0x06C1, 0x0627,
+                0x0020,
+                0x06C1, 0x0648, 0x06BA,
+                0x002E, 0x002E, 0x002E
+            ),
+
+        login:
+            U(
+                0x067E, 0x0631, 0x0648,
+                0x0020,
+                0x067E, 0x0644, 0x0627, 0x0646,
+                0x0020,
+                0x06A9, 0x06CC,
+                0x0020,
+                0x06A9, 0x0627, 0x0631, 0x0631, 0x0648, 0x0627, 0x0626, 0x06CC, 0x0627, 0x06BA,
+                0x0020,
+                0x0627, 0x0633, 0x062A, 0x0639, 0x0645, 0x0627, 0x0644,
+                0x0020,
+                0x06A9, 0x0631, 0x0646, 0x06D2,
+                0x0020,
+                0x06A9, 0x06D2,
+                0x0020,
+                0x0644, 0x06CC, 0x06D2,
+                0x0020,
+                0x067E, 0x06C1, 0x0644, 0x06D2
+                0x0020,
+                0x0644, 0x0627, 0x06AF,
+                0x0020,
+                0x0627, 0x0653, 0x0646,
+                0x0020,
+                0x06A9, 0x0631, 0x06CC, 0x06BA,
+                0x06D4
+            ),
+
+        error:
+            U(
+                0x067E, 0x0631, 0x0648,
+                0x0020,
+                0x0627, 0x06CC, 0x062C, 0x0646, 0x0679,
+                0x0020,
+                0x0633, 0x06D2,
+                0x0020,
+                0x0631, 0x0627, 0x0628, 0x0637, 0x06C1,
+                0x0020,
+                0x0646, 0x06C1, 0x06CC, 0x06BA,
+                0x0020,
+                0x06C1, 0x0648,
+                0x0020,
+                0x0633, 0x06A9, 0x0627,
+                0x06D4,
+                0x0020,
+                0x0628, 0x0631, 0x0627, 0x06C1,
+                0x0020,
+                0x06A9, 0x0631, 0x0645,
+                0x0020,
+                0x0628, 0x06CC, 0x06A9,
+                0x0020,
+                0x0627, 0x06CC, 0x0646, 0x0688,
+                0x0020,
+                0x0686, 0x06CC, 0x06A9,
+                0x0020,
+                0x06A9, 0x0631, 0x06CC, 0x06BA,
+                0x06D4
+            )
+    };
+
+    // =========================================================
+    // JWT
+    // =========================================================
+
+    function getToken() {
+        return (
+            localStorage.getItem("digital_fte_token") ||
+            localStorage.getItem("access_token") ||
+            localStorage.getItem("token") ||
+            sessionStorage.getItem("access_token") ||
+            sessionStorage.getItem("token")
+        );
+    }
+
+    // =========================================================
+    // CREATE CHATBOT
+    // =========================================================
+
     const root =
         document.createElement("div");
 
@@ -26,11 +194,9 @@
 
     root.innerHTML = `
         <!-- GREETING POPUP -->
-        <div
-            class="dfte-pro-launcher-message"
-        >
+        <div class="dfte-pro-launcher-message">
             <span>
-                Hi! &#x1F44B;
+                Hi! ${HAND}
             </span>
 
             <small>
@@ -38,15 +204,15 @@
             </small>
         </div>
 
-        <!-- ROBOT -->
+        <!-- ROBOT LAUNCHER -->
         <button
             class="dfte-pro-launcher"
-            aria-label="Open Digital FTE Pro Agent"
+            aria-label="Open AUTO-FTE Pro Agent"
             type="button"
         >
             <img
                 src="${ROBOT_URL}"
-                alt="Digital FTE Pro Agent"
+                alt="AUTO-FTE Pro Agent"
             >
         </button>
 
@@ -57,35 +223,27 @@
         >
 
             <!-- HEADER -->
-            <header
-                class="dfte-pro-header"
-            >
+            <header class="dfte-pro-header">
 
-                <div
-                    class="dfte-pro-brand"
-                >
+                <div class="dfte-pro-brand">
 
-                    <div
-                        class="dfte-pro-logo"
-                    >
+                    <div class="dfte-pro-logo">
+
                         <img
                             src="${ROBOT_URL}"
-                            alt="Digital FTE Pro Agent"
+                            alt="AUTO-FTE Pro Agent"
                         >
+
                     </div>
 
                     <div>
 
-                        <div
-                            class="dfte-pro-title"
-                        >
-                            Digital FTE Pro Agent
+                        <div class="dfte-pro-title">
+                            AUTO-FTE Pro Agent
                         </div>
 
-                        <div
-                            class="dfte-pro-status"
-                        >
-                            &#x25CF; Online
+                        <div class="dfte-pro-status">
+                            ${BULLET} Online
                         </div>
 
                     </div>
@@ -97,36 +255,30 @@
                     aria-label="Close chatbot"
                     type="button"
                 >
-                    &#x00D7;
+                    ${CLOSE}
                 </button>
 
             </header>
 
             <!-- BODY -->
-            <main
-                class="dfte-pro-body"
-            >
+            <main class="dfte-pro-body">
 
-                <!-- LANGUAGE -->
-                <div
-                    class="dfte-pro-language-screen"
-                >
+                <!-- LANGUAGE SCREEN -->
+                <div class="dfte-pro-language-screen">
 
-                    <div
-                        class="dfte-pro-welcome-avatar"
-                    >
+                    <div class="dfte-pro-welcome-avatar">
                         <img
                             src="${ROBOT_URL}"
-                            alt="Digital FTE"
+                            alt="AUTO-FTE"
                         >
                     </div>
 
                     <h2>
-                        Hi! &#x1F44B;
+                        Hi! ${HAND}
                     </h2>
 
                     <p>
-                        I'm your Digital FTE Pro Agent.
+                        I'm your AUTO-FTE Pro Agent.
                         I can help you perform authorized
                         actions on your connected store.
                     </p>
@@ -153,13 +305,15 @@
                             data-language="english"
                             type="button"
                         >
+
                             <span class="flag">
-                                &#x1F1EC;&#x1F1E7;
+                                ${ENGLISH_FLAG}
                             </span>
 
                             <span>
                                 English
                             </span>
+
                         </button>
 
                         <!-- URDU -->
@@ -168,13 +322,15 @@
                             data-language="urdu"
                             type="button"
                         >
+
                             <span class="flag">
-                                &#x1F1F5;&#x1F1F0;
+                                ${PAKISTAN_FLAG}
                             </span>
 
                             <span>
-                                &#x0627;&#x0631;&#x062F;&#x0648;
+                                ${URDU.label}
                             </span>
+
                         </button>
 
                         <!-- ROMAN URDU -->
@@ -183,33 +339,36 @@
                             data-language="roman_urdu"
                             type="button"
                         >
+
                             <span class="flag">
-                                &#x1F1F5;&#x1F1F0;
+                                ${PAKISTAN_FLAG}
                             </span>
 
                             <span>
                                 Roman Urdu
                             </span>
+
                         </button>
 
                     </div>
+
                 </div>
 
-                <!-- CHAT -->
+                <!-- CHAT SCREEN -->
                 <div
                     class="dfte-pro-chat-screen"
                 >
+
                     <div
                         class="dfte-pro-messages"
                     ></div>
+
                 </div>
 
             </main>
 
             <!-- FOOTER -->
-            <footer
-                class="dfte-pro-footer"
-            >
+            <footer class="dfte-pro-footer">
 
                 <div
                     class="dfte-pro-input-row"
@@ -226,7 +385,7 @@
                         aria-label="Send message"
                         type="button"
                     >
-                        &#x27A4;
+                        ${SEND}
                     </button>
 
                 </div>
@@ -234,7 +393,7 @@
                 <div
                     class="dfte-pro-footer-text"
                 >
-                    Digital FTE Pro · AI Agent
+                    Digital FTE Pro - AI Agent
                 </div>
 
             </footer>
@@ -294,26 +453,9 @@
             ".dfte-pro-messages"
         );
 
-    function getToken() {
-
-        return (
-            localStorage.getItem(
-                "access_token"
-            ) ||
-
-            localStorage.getItem(
-                "token"
-            ) ||
-
-            sessionStorage.getItem(
-                "access_token"
-            ) ||
-
-            sessionStorage.getItem(
-                "token"
-            )
-        );
-    }
+    // =========================================================
+    // ADD MESSAGE
+    // =========================================================
 
     function addMessage(
         text,
@@ -326,7 +468,8 @@
             );
 
         row.className =
-            `dfte-pro-message ${type}`;
+            "dfte-pro-message " +
+            type;
 
         const bubble =
             document.createElement(
@@ -377,6 +520,10 @@
             messages.scrollHeight;
     }
 
+    // =========================================================
+    // OPEN / CLOSE
+    // =========================================================
+
     function openChat() {
 
         windowEl.classList.add(
@@ -403,11 +550,11 @@
             "aria-hidden",
             "true"
         );
-
-        launcherMessage.classList.remove(
-            "show"
-        );
     }
+
+    // =========================================================
+    // LANGUAGE SELECT
+    // =========================================================
 
     languageButtons.forEach(
         (button) => {
@@ -438,7 +585,7 @@
                         ) {
 
                             message =
-                                "\u0633\u0644\u0627\u0645 \u0639\u0644\u06CC\u06A9\u0645! \uD83D\uDC4B \u0645\u06CC\u06BA \u0622\u067E \u06A9\u0627 \u0688\u06CC\u062C\u06CC\u0679\u0644 \u0627\u06CC\u0641 \u0679\u06CC \u0627\u06CC \u067E\u0631\u0648 \u0627\u06CC\u062C\u0646\u0679 \u06C1\u0648\u06BA\u06D4 \u0628\u062A\u0627\u0626\u06CC\u06D2\u060C \u0622\u067E \u0627\u067E\u0646\u06D2 \u0645\u0646\u0633\u0644\u06A9 \u0627\u0633\u0679\u0648\u0631 \u0645\u06CC\u06BA \u06A9\u06CC\u0627 \u06A9\u0631\u0648\u0627\u0646\u0627 \u0686\u0627\u06C1\u062A\u06D2 \u06C1\u06CC\u06BA\u061F";
+                                URDU.welcome;
 
                         } else if (
                             selectedLanguage ===
@@ -446,12 +593,16 @@
                         ) {
 
                             message =
-                                "Assalam-o-Alaikum! \uD83D\uDC4B Main aapka Digital FTE Pro Agent hoon. Batayein aap apne connected store mein kya karwana chahte hain?";
+                                "Assalam-o-Alaikum! " +
+                                HAND +
+                                " Main aapka Digital FTE Pro Agent hoon. Batayein aap apne connected store mein kya karwana chahte hain?";
 
                         } else {
 
                             message =
-                                "Hi! \uD83D\uDC4B I'm your Digital FTE Pro Agent. Tell me what you'd like me to do, and I'll handle it for you.";
+                                "Hi! " +
+                                HAND +
+                                " I'm your Digital FTE Pro Agent. Tell me what you'd like me to do, and I'll handle it for you.";
                         }
 
                         addMessage(
@@ -468,12 +619,18 @@
                         input.dir =
                             "rtl";
 
+                        input.style.direction =
+                            "rtl";
+
                         input.style.textAlign =
                             "right";
 
                     } else {
 
                         input.dir =
+                            "ltr";
+
+                        input.style.direction =
                             "ltr";
 
                         input.style.textAlign =
@@ -485,6 +642,10 @@
             );
         }
     );
+
+    // =========================================================
+    // SEND MESSAGE
+    // =========================================================
 
     async function sendMessage() {
 
@@ -502,30 +663,19 @@
         const jwt =
             getToken();
 
-        if (!jwt) {
+        // -----------------------------------------------------
+        // LOGIN REQUIRED
+        // -----------------------------------------------------
 
+        if (!jwt) {
             let loginMessage;
 
-            if (
-                selectedLanguage ===
-                "urdu"
-            ) {
-
-                loginMessage =
-                    "\u067E\u0631\u0648 \u067E\u0644\u0627\u0646 \u06A9\u06CC \u06A9\u0627\u0631\u0631\u0648\u0627\u0626\u06CC\u0627\u06BA \u0627\u0633\u062A\u0639\u0645\u0627\u0644 \u06A9\u0631\u0646\u06D2 \u06A9\u06D2 \u0644\u06CC\u06D2 \u067E\u06C1\u0644\u06D2 \u0644\u0627\u06AF \u0627\u06D4\u0646 \u06A9\u0631\u06CC\u06BA\u06D4";
-
-            } else if (
-                selectedLanguage ===
-                "roman_urdu"
-            ) {
-
-                loginMessage =
-                    "Pro Plan ki actions use karne ke liye pehle login karein.";
-
+            if (selectedLanguage === "urdu") {
+                loginMessage = "Not Store Connected Yet۔ برائے کرم لاگ ان کریں اور ڈیش بورڈ سے اپنا اسٹور منسلک کریں۔";
+            } else if (selectedLanguage === "roman_urdu") {
+                loginMessage = "Not Store Connected Yet. Barah-e-karam pehle login karein aur dashboard se apna store connect karein.";
             } else {
-
-                loginMessage =
-                    "Please log in first to use Pro Plan store actions.";
+                loginMessage = "Not Store Connected Yet. Please log in and connect your store from the dashboard.";
             }
 
             addMessage(
@@ -536,6 +686,10 @@
             return;
         }
 
+        // -----------------------------------------------------
+        // USER MESSAGE
+        // -----------------------------------------------------
+
         addMessage(
             query,
             "user"
@@ -545,6 +699,10 @@
 
         sendButton.disabled =
             true;
+
+        // -----------------------------------------------------
+        // THINKING
+        // -----------------------------------------------------
 
         const typing =
             document.createElement(
@@ -564,7 +722,7 @@
 
         typingBubble.textContent =
             selectedLanguage === "urdu"
-                ? "\u0633\u0648\u0686 \u0631\u06C1\u0627 \u06C1\u0648\u06BA..."
+                ? URDU.thinking
                 : selectedLanguage === "roman_urdu"
                     ? "Soch raha hoon..."
                     : "Thinking...";
@@ -595,6 +753,10 @@
         messages.scrollTop =
             messages.scrollHeight;
 
+        // -----------------------------------------------------
+        // API REQUEST
+        // -----------------------------------------------------
+
         try {
 
             const response =
@@ -613,7 +775,8 @@
                                 "application/json",
 
                             "Authorization":
-                                `Bearer ${jwt}`
+                                "Bearer " +
+                                jwt
                         },
 
                         body:
@@ -637,13 +800,22 @@
             let data = {};
 
             try {
+
                 data =
-                    JSON.parse(raw);
+                    JSON.parse(
+                        raw
+                    );
+
             } catch (_) {
+
                 data = {};
             }
 
             typing.remove();
+
+            // -------------------------------------------------
+            // ERROR
+            // -------------------------------------------------
 
             if (!response.ok) {
 
@@ -654,7 +826,7 @@
                         selectedLanguage ===
                         "urdu"
 
-                            ? "\u067E\u0631\u0648 \u0627\u06CC\u062C\u0646\u0679 \u06CC\u06C1 \u062F\u0631\u062E\u0648\u0627\u0633\u062A \u0645\u06A9\u0645\u0644 \u0646\u06C1\u06CC\u06BA \u06A9\u0631 \u0633\u06A9\u0627\u06D4"
+                            ? URDU.error
 
                             : selectedLanguage ===
                               "roman_urdu"
@@ -672,6 +844,10 @@
                 return;
             }
 
+            // -------------------------------------------------
+            // SAVE CONVERSATION
+            // -------------------------------------------------
+
             conversationId =
                 data.conversation_id ||
                 conversationId;
@@ -683,6 +859,10 @@
                     String(conversationId)
                 );
             }
+
+            // -------------------------------------------------
+            // SUCCESS
+            // -------------------------------------------------
 
             const answer =
                 data.answer ||
@@ -698,10 +878,29 @@
             } else {
 
                 addMessage(
-                    selectedLanguage === "urdu"
-                        ? "\u062F\u0631\u062E\u0648\u0627\u0633\u062A \u06A9\u0627\u0645\u06CC\u0627\u0628\u06CC \u0633\u06D2 \u0645\u06A9\u0645\u0644 \u06C1\u0648 \u06AF\u0626\u06CC\u06D4"
-                        : selectedLanguage === "roman_urdu"
+                    selectedLanguage ===
+                        "urdu"
+
+                        ? U(
+                            0x062F, 0x0631, 0x062E, 0x0648, 0x0627, 0x0633, 0x062A,
+                            0x0020,
+                            0x06A9, 0x0627, 0x0645, 0x06CC, 0x0627, 0x0628, 0x06CC,
+                            0x0020,
+                            0x0633, 0x06D2,
+                            0x0020,
+                            0x0645, 0x06A9, 0x0645, 0x0644,
+                            0x0020,
+                            0x06C1, 0x0648,
+                            0x0020,
+                            0x06AF, 0x0626, 0x06CC,
+                            0x06D4
+                        )
+
+                        : selectedLanguage ===
+                          "roman_urdu"
+
                             ? "Request successfully process ho gayi."
+
                             : "Request processed successfully.",
                     "bot"
                 );
@@ -719,7 +918,7 @@
             ) {
 
                 errorMessage =
-                    "\u067E\u0631\u0648 \u0627\u06CC\u062C\u0646\u0679 \u0633\u06D2 \u0631\u0627\u0628\u0637\u06C1 \u0646\u06C1\u06CC\u06BA \u06C1\u0648 \u0633\u06A9\u0627\u06D4 \u0628\u0631\u0627\u06C1 \u06A9\u0631\u0645 \u0628\u06CC\u06A9 \u0627\u06CC\u0646\u0688 \u0686\u06CC\u06A9 \u06A9\u0631\u06CC\u06BA\u06D4";
+                    URDU.error;
 
             } else if (
                 selectedLanguage ===
@@ -754,6 +953,10 @@
         }
     }
 
+    // =========================================================
+    // EVENTS
+    // =========================================================
+
     launcher.addEventListener(
         "click",
         openChat
@@ -785,7 +988,10 @@
         }
     );
 
-    // SHOW PRO GREETING POPUP
+    // =========================================================
+    // SHOW GREETING POPUP
+    // =========================================================
+
     setTimeout(
         () => {
 

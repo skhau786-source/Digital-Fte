@@ -1,33 +1,53 @@
-# Digital FTE — Frontend
+# 💻 AUTO-FTE — Frontend Application
 
-AI-powered E-commerce Autonomous Employee platform. Frontend built with Next.js + TypeScript + Tailwind CSS. Currently runs on mock/simulated data — no backend connected yet.
+Modern merchant dashboard and conversational client for **AUTO-FTE** (Digital FTE), built with **Next.js 15 (React 19)**, **TypeScript**, and **Tailwind CSS**.
 
-## Run Locally
+---
+
+## 🚀 Running Locally
 
 ```bash
-git clone https://github.com/HassanAliJunejo/Digital-Fte-Startup.git
-cd Digital-Fte-Startup
+cd frontend
 npm install
 npm run dev
 ```
-Opens at `http://localhost:3000`.
 
-## Environment Variables
-Create a `.env` file in the project root:
-```
+App opens at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## ⚙️ Environment Variables
+
+Create `.env.local` in `frontend/`:
+
+```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_CHATBOT_PLAN=free
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
-- `NEXT_PUBLIC_API_URL` — point this to wherever your backend runs.
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` — **required**, the app will crash on load without it (used in `app/layout.tsx` to initialize Google login). Get one from [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials → Create OAuth Client ID. A placeholder value works to stop the crash if you're not testing Google login yet.
 
-## What the Backend Needs to Build
-- **Auth API** — signup/login endpoints, plus `POST /api/auth/google` (expects `email`, `name`, `picture`, `googleId`)
-- **Shopify OAuth** — endpoint to exchange OAuth code for an access token
-- **Inventory API** — endpoint to return real product data (currently mocked)
-## Author
-Laiba Jabbar — https://github.com/Laibajabbareng
+- `NEXT_PUBLIC_API_URL`: Points to the running FastAPI backend (`http://localhost:8000`).
+- `NEXT_PUBLIC_CHATBOT_PLAN`: Set to `free` or `pro` for the chatbot widget.
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: Google OAuth client ID for single-click merchant authentication.
 
+---
 
-## Backend integration
-This frontend bundle is packaged with the Digital FTE chatbot loader. Set `NEXT_PUBLIC_API_URL` to the FastAPI backend URL. Set `NEXT_PUBLIC_CHATBOT_PLAN=free` or `pro` for the default chatbot widget.
+## 🌟 Key Pages & Modules
+
+- `/dashboard/overview` — Executive KPIs, live revenue, orders, and conversion telemetry.
+- `/dashboard/agents` — 7-Agent Interactive Command Center, uniform card layout, and live hacker terminal.
+- `/dashboard/settings` — Autopilot Operating Window & Campaign Date Duration scheduler.
+- `/dashboard/products` — Product catalog, stock alerts, and SEO keyword audit insights.
+- `/dashboard/social` — AI-generated content review, scheduling queue, and multi-channel publishing.
+- `/dashboard/customers` — Customer sentiment tracking and interaction ledger.
+
+---
+
+## 🏗️ Production Build
+
+```bash
+npm run build
+npm start
+```
+
+Verified with **zero TypeScript errors** and static page pre-rendering.

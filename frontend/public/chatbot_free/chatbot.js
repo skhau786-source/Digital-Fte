@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     "use strict";
 
     const API_URL =
@@ -133,6 +133,7 @@
 
     function getToken() {
         const possibleKeys = [
+            "digital_fte_token",
             "access_token",
             "token",
             "jwt"
@@ -175,12 +176,12 @@
             <button
                 id="dfte-launcher"
                 class="dfte-launcher"
-                aria-label="Open Digital FTE chatbot"
+                aria-label="Open AUTO-FTE chatbot"
                 type="button"
             >
                 <img
                     src="/chatbot_free/digital_fte_robot.png"
-                    alt="Digital FTE AI Assistant"
+                    alt="AUTO-FTE AI Assistant"
                 >
             </button>
 
@@ -205,15 +206,15 @@
 
                         <div class="dfte-logo">
                             <img
-                                src="/chatbot_free/digital_fte_robot.png"
-                                alt="Digital FTE"
+                                src="/images/logo.jpeg"
+                                alt="AUTO-FTE"
                             >
                         </div>
 
                         <div>
 
                             <div class="dfte-title">
-                                Digital FTE AI Assistant
+                                AUTO-FTE AI Assistant
                             </div>
 
                             <div class="dfte-status">
@@ -252,7 +253,7 @@
                         </h3>
 
                         <p>
-                            I'm your Digital FTE AI Assistant.
+                            I'm your AUTO-FTE AI Assistant.
                             I can answer questions about the
                             platform and your connected store.
                         </p>

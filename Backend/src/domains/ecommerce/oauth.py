@@ -46,9 +46,71 @@ def _extract_user_id_from_state(state: str) -> int | None:
         return None
 
 
+def _clean_shopify_domain(raw_domain: str) -> str:
+    domain = raw_domain.strip().lower()
+    domain = domain.replace("https://", "").replace("http://", "").rstrip("/")
+    if domain.endswith(".myshopify.com"):
+        domain = domain[:-len(".myshopify.com")]
+    return domain.strip()
+
+
+@router.get("/{platform}/authorize-url")
+async def get_platform_authorize_url(
+    platform: str,
+    shop: str = Query(""),
+    redirect_uri: str = Query(""),
+    current_user: User = Depends(get_current_user),
+):
+    """Generate official OAuth authorization URL for the requested store domain."""
+    platform = platform.lower().strip()
+    if not PlatformRegistry.is_supported(platform):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported platform: {platform}. Supported: {PlatformRegistry.list_platforms()}",
+        )
+
+    try:
+        config = OAuthProviderRegistry.get_config(platform)
+        redirect_target = config.redirect_uri or redirect_uri
+
+        state_jwt = create_access_token(
+            {"sub": str(current_user.id), "type": "oauth_state"},
+            expires_delta=timedelta(minutes=15),
+        )
+
+        clean_shop = _clean_shopify_domain(shop) if platform == "shopify" else shop.strip()
+        signed_state = f"{clean_shop}:{state_jwt}" if clean_shop else state_jwt
+
+        if platform == "shopify":
+            if not clean_shop:
+                raise HTTPException(status_code=400, detail="Store domain (e.g. mystore.myshopify.com) is required.")
+            client_id = config.client_id or "autofte_enterprise_client"
+            authorize_url = config.authorize_url.format(shop_domain=f"{clean_shop}.myshopify.com")
+            authorize_url += f"?client_id={client_id}&scope={','.join(config.scopes)}"
+            authorize_url += f"&redirect_uri={redirect_target}&state={signed_state}"
+        else:
+            client_id = config.client_id or f"autofte_{platform}_client"
+            authorize_url = f"{config.authorize_url}?client_id={client_id}"
+            authorize_url += f"&scope={','.join(config.scopes)}"
+            authorize_url += f"&redirect_uri={redirect_target}&state={signed_state}"
+
+        return {
+            "platform": platform,
+            "shop": clean_shop,
+            "authorize_url": authorize_url,
+            "has_credentials": bool(config.client_id),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to generate authorize URL for {platform}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{platform}/start")
 async def oauth_start(
     platform: str,
+    shop: str = "",
     redirect_uri: str = "",
     state: str = "",
     current_user: User = Depends(get_current_user),
@@ -72,16 +134,19 @@ async def oauth_start(
             {"sub": str(current_user.id), "type": "oauth_state"},
             expires_delta=timedelta(minutes=15),
         )
-        signed_state = f"{state}:{state_jwt}" if state else state_jwt
+
+        clean_shop = _clean_shopify_domain(shop or state.split(":")[0] if ":" in state else (shop or state))
+        signed_state = f"{clean_shop}:{state_jwt}" if clean_shop else state_jwt
 
         # Shopify needs shop_name in the state
         if platform == "shopify":
-            shop_name = state.split(":")[0] if ":" in state else state
-            authorize_url = config.authorize_url.format(shop_domain=f"{shop_name}.myshopify.com")
-            authorize_url += f"?client_id={config.client_id}&scope={','.join(config.scopes)}"
+            client_id = config.client_id or "autofte_enterprise_client"
+            authorize_url = config.authorize_url.format(shop_domain=f"{clean_shop}.myshopify.com")
+            authorize_url += f"?client_id={client_id}&scope={','.join(config.scopes)}"
             authorize_url += f"&redirect_uri={redirect_target}&state={signed_state}"
         else:
-            authorize_url = f"{config.authorize_url}?client_id={config.client_id}"
+            client_id = config.client_id or f"autofte_{platform}_client"
+            authorize_url = f"{config.authorize_url}?client_id={client_id}"
             authorize_url += f"&scope={','.join(config.scopes)}"
             authorize_url += f"&redirect_uri={redirect_target}&state={signed_state}"
 
@@ -161,12 +226,10 @@ async def oauth_callback(
         await db.refresh(store)
         logger.info(f"OAuth complete: {platform} store #{store.id} ({store_name})")
 
-        return {
-            "status": "connected",
-            "store_id": store.id,
-            "platform": platform,
-            "message": f"{platform} store connected! Sync will begin shortly.",
-        }
+        frontend_url = get_settings().FRONTEND_URL or "http://localhost:3000"
+        return RedirectResponse(
+            url=f"{frontend_url}/dashboard/overview?store_connected=true&store_id={store.id}"
+        )
 
     except HTTPException:
         raise

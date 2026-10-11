@@ -12,10 +12,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.sdk.database import get_db
-from src.sdk.models.content import GeneratedPost, BrandVoiceProfile
+from src.sdk.models.content import GeneratedPost, BrandVoiceProfile, ImageAsset
 from src.sdk.event_bus import RedisEventBus
 
 from src.dependencies import get_event_bus
@@ -51,12 +52,16 @@ async def generate_post(
             image_model=body.image_model,
             auto_approve=body.auto_approve,
         )
-        image_url = post.images[0].url if post.images else ""
+        img_result = await db.execute(
+            select(ImageAsset).where(ImageAsset.post_id == post.id)
+        )
+        images = img_result.scalars().all()
+        image_url = images[0].url if images else ""
         return GenerateResponse(
             message="Content generated successfully",
             post_id=post.id,
             status=post.status,
-            caption=post.caption[:200],  # preview
+            caption=post.caption,
             image_url=image_url,
         )
     except ValueError as e:
@@ -76,7 +81,11 @@ async def list_posts(
     current_user=Depends(get_current_user),
 ):
     """List generated posts with optional status filter."""
-    query = select(GeneratedPost).order_by(GeneratedPost.created_at.desc())
+    query = (
+        select(GeneratedPost)
+        .options(selectinload(GeneratedPost.images))
+        .order_by(GeneratedPost.created_at.desc())
+    )
     if status:
         query = query.where(GeneratedPost.status == status)
     query = query.limit(limit)

@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     "use strict";
 
     const API_URL =
@@ -174,6 +174,7 @@
 
     function getToken() {
         return (
+            localStorage.getItem("digital_fte_token") ||
             localStorage.getItem("access_token") ||
             localStorage.getItem("token") ||
             sessionStorage.getItem("access_token") ||
@@ -206,12 +207,12 @@
         <!-- ROBOT LAUNCHER -->
         <button
             class="dfte-pro-launcher"
-            aria-label="Open Digital FTE Pro Agent"
+            aria-label="Open AUTO-FTE Pro Agent"
             type="button"
         >
             <img
                 src="${ROBOT_URL}"
-                alt="Digital FTE Pro Agent"
+                alt="AUTO-FTE Pro Agent"
             >
         </button>
 
@@ -230,7 +231,7 @@
 
                         <img
                             src="${ROBOT_URL}"
-                            alt="Digital FTE Pro Agent"
+                            alt="AUTO-FTE Pro Agent"
                         >
 
                     </div>
@@ -238,7 +239,7 @@
                     <div>
 
                         <div class="dfte-pro-title">
-                            Digital FTE Pro Agent
+                            AUTO-FTE Pro Agent
                         </div>
 
                         <div class="dfte-pro-status">
@@ -268,7 +269,7 @@
                     <div class="dfte-pro-welcome-avatar">
                         <img
                             src="${ROBOT_URL}"
-                            alt="Digital FTE"
+                            alt="AUTO-FTE"
                         >
                     </div>
 
@@ -277,7 +278,7 @@
                     </h2>
 
                     <p>
-                        I'm your Digital FTE Pro Agent.
+                        I'm your AUTO-FTE Pro Agent.
                         I can help you perform authorized
                         actions on your connected store.
                     </p>
@@ -667,29 +668,14 @@
         // -----------------------------------------------------
 
         if (!jwt) {
-
             let loginMessage;
 
-            if (
-                selectedLanguage ===
-                "urdu"
-            ) {
-
-                loginMessage =
-                    URDU.login;
-
-            } else if (
-                selectedLanguage ===
-                "roman_urdu"
-            ) {
-
-                loginMessage =
-                    "Pro Plan ki actions use karne ke liye pehle login karein.";
-
+            if (selectedLanguage === "urdu") {
+                loginMessage = "Not Store Connected Yet۔ برائے کرم لاگ ان کریں اور ڈیش بورڈ سے اپنا اسٹور منسلک کریں۔";
+            } else if (selectedLanguage === "roman_urdu") {
+                loginMessage = "Not Store Connected Yet. Barah-e-karam pehle login karein aur dashboard se apna store connect karein.";
             } else {
-
-                loginMessage =
-                    "Please log in first to use Pro Plan store actions.";
+                loginMessage = "Not Store Connected Yet. Please log in and connect your store from the dashboard.";
             }
 
             addMessage(

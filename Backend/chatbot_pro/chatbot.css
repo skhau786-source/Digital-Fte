@@ -68,13 +68,12 @@
     right: 24px;
     bottom: 24px;
 
-    width: 68px;
-    height: 68px;
+    width: 72px;
+    height: 72px;
 
     padding: 0;
 
-    border: 1px solid rgba(255, 193, 7, 0.35);
-
+    border: 1px solid rgba(255, 193, 7, 0.4);
     border-radius: 50%;
 
     background: #ffc107;
@@ -84,13 +83,11 @@
     z-index: 99999;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
     box-shadow:
-        0 10px 35px rgba(255, 193, 7, 0.35);
+        0 10px 35px rgba(255, 193, 7, 0.45);
 
     transition:
         transform 0.2s ease,
@@ -98,19 +95,20 @@
 }
 
 .dfte-pro-launcher:hover {
-    transform: scale(1.06);
+    transform: scale(1.08);
 
     box-shadow:
-        0 12px 40px rgba(255, 193, 7, 0.48);
+        0 14px 40px rgba(255, 193, 7, 0.60);
 }
 
 .dfte-pro-launcher img {
-    width: 53px;
-    height: 53px;
+    width: 58px;
+    height: 58px;
 
     object-fit: contain;
 
     border-radius: 50%;
+    display: block;
 }
 
 

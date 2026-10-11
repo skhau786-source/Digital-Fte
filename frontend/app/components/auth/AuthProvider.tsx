@@ -1,90 +1,89 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-interface AuthContextValue {
-  authenticatedUser: string | null;
-  setAuthenticatedUser: (user: string | null) => void;
-  isAuthenticated: boolean;
-  isHydrated: boolean;
-  login: (user: string | null) => void;
-  logout: () => void;
+export interface UserOut {
+  id: string;
+  email: string;
+  username: string;
+  full_name: string;
 }
 
-const STORAGE_KEY = "digital-fte-auth";
+interface AuthContextType {
+  user: UserOut | null;
+  token: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (token: string, user: UserOut) => void;
+  logout: () => void;
+  updateUser: (user: UserOut) => void;
+}
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const TOKEN_KEY = "digital_fte_token";
+const USER_KEY = "digital_fte_user";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authenticatedUser, setAuthenticatedUser] = useState<string | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const pathname = usePathname();
-  const router = useRouter();
+  const [user, setUser] = useState<UserOut | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as { user?: string | null };
-        if (parsed?.user) {
-          setAuthenticatedUser(parsed.user);
-        }
+      const savedToken = localStorage.getItem(TOKEN_KEY);
+      const savedUser = localStorage.getItem(USER_KEY);
+      if (savedToken && savedUser) {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
       }
     } catch {
-      // Ignore storage errors and continue with unauthenticated state.
-    } finally {
-      setIsHydrated(true);
+      // Ignore invalid persisted state
+    }
+    setIsLoading(false);
+  }, []);
+
+  const login = useCallback((newToken: string, newUser: UserOut) => {
+    setToken(newToken);
+    setUser(newUser);
+    try {
+      localStorage.setItem(TOKEN_KEY, newToken);
+      localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+    } catch {
+      // Ignore write failures
     }
   }, []);
 
-  useEffect(() => {
-    if (!isHydrated) return;
-
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
     try {
-      if (authenticatedUser) {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: authenticatedUser }));
-      } else {
-        window.localStorage.removeItem(STORAGE_KEY);
-      }
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem("digital-fte-page-state");
+      localStorage.removeItem("digital-fte-auth");
     } catch {
-      // Ignore storage write failures.
+      // Ignore
     }
-  }, [authenticatedUser, isHydrated]);
+    window.location.href = "/login";
+  }, []);
 
-  useEffect(() => {
-    if (!isHydrated) return;
-
-    if (authenticatedUser && pathname === "/") {
-      router.replace("/dashboard");
+  const updateUser = useCallback((updatedUser: UserOut) => {
+    setUser(updatedUser);
+    try {
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+    } catch {
+      // Ignore
     }
+  }, []);
 
-    if (!authenticatedUser && pathname.startsWith("/dashboard")) {
-      router.replace("/");
-    }
-  }, [authenticatedUser, isHydrated, pathname, router]);
+  const isAuthenticated = Boolean(user && token);
 
-  const login = (user: string | null) => {
-    setAuthenticatedUser(user);
-  };
-
-  const logout = () => {
-    setAuthenticatedUser(null);
-  };
-
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      authenticatedUser,
-      setAuthenticatedUser,
-      isAuthenticated: Boolean(authenticatedUser),
-      isHydrated,
-      login,
-      logout,
-    }),
-    [authenticatedUser, isHydrated]
+  return (
+    <AuthContext.Provider value={{ user, token, isLoading, isAuthenticated, login, logout, updateUser }}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

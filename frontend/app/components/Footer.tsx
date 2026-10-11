@@ -2,8 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { TrendingUp, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useLanguage } from "../lib/LanguageContext";
+import { AppLogo } from "@/app/components/ui/AppLogo";
+import { BRAND_CONFIG } from "@/app/lib/branding";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -18,17 +20,7 @@ export function Footer() {
           
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-3 group inline-flex">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-400 flex items-center justify-center text-[#06111b] font-extrabold shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xl font-extrabold tracking-tight text-white">Digital FTE</span>
-                <p className="text-[10px] font-bold text-amber-300 tracking-widest uppercase">
-                  Autonomous AI Employee
-                </p>
-              </div>
-            </Link>
+            <AppLogo href="/" size="md" showText={true} showTagline={true} />
 
             <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
               {t("footer.description") || "Empowering 24/7 E-Commerce growth with secure, autonomous AI employee containers."}
@@ -135,7 +127,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© 2026 Digital FTE. All rights reserved.</p>
+          <p>© {BRAND_CONFIG.year} {BRAND_CONFIG.name}. All rights reserved.</p>
           <div className="flex items-center gap-4 text-slate-400">
             <Link href="/privacy" className="hover:text-amber-300 transition-colors">Privacy</Link>
             <span>•</span>

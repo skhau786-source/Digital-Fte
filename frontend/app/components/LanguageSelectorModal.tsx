@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../lib/LanguageContext";
-import { TrendingUp } from "lucide-react";
+import { AppLogo } from "@/app/components/ui/AppLogo";
 
 export function LanguageSelectorModal() {
   const { showLanguageModal, setLanguage, closeLanguageModal } = useLanguage();
@@ -91,18 +91,8 @@ export function LanguageSelectorModal() {
 
               <div className="p-8 sm:p-10">
                 {/* Logo */}
-                <div className="flex items-center justify-center gap-3 mb-8">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-400 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                    <TrendingUp className="w-6 h-6 text-[#06111b]" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-extrabold text-white tracking-tight">
-                      Digital FTE
-                    </p>
-                    <p className="text-[10px] font-bold text-amber-300 tracking-widest uppercase">
-                      AI E-Commerce Employee
-                    </p>
-                  </div>
+                <div className="flex items-center justify-center mb-8">
+                  <AppLogo size="lg" showText={true} showTagline={true} />
                 </div>
 
                 {/* Divider */}

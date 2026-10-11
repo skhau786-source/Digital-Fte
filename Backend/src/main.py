@@ -22,6 +22,7 @@ from src.dependencies import init_event_bus, close_event_bus, close_llm_client
 from src.domains.auth.routes import router as auth_router
 from src.domains.ecommerce import routes_router, webhooks_router, oauth_router
 from src.domains.chatbot.api import router as chatbot_router
+from src.domains.dashboard_api import router as dashboard_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -83,14 +84,33 @@ async def _start_workers():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
-    await init_db()
-    await init_event_bus()
+    try:
+        await init_db()
+        logger.info("Database initialized successfully")
+        try:
+            from src.domains.auth.seeder import seed_demo_enterprise_user
+            await seed_demo_enterprise_user()
+            logger.info("Demo enterprise user and store verified")
+        except Exception as seed_err:
+            logger.warning(f"Could not seed demo enterprise user: {seed_err}")
+    except Exception as e:
+        logger.warning(f"Database not connected ({e}). Running in offline/mock mode.")
+
+    try:
+        await init_event_bus()
+        logger.info("Event bus initialized successfully")
+    except Exception as e:
+        logger.warning(f"Redis event bus not connected ({e}). Running without Redis.")
+
     workers = await _start_workers()
-    logger.info("DB ready, event bus connected, workers running")
+    logger.info("Startup complete. Server is ready!")
     yield
     for t in workers:
         t.cancel()
-    await close_event_bus()
+    try:
+        await close_event_bus()
+    except Exception:
+        pass
     await close_llm_client()
     logger.info("Shutdown complete")
 
@@ -103,10 +123,15 @@ app = FastAPI(
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
-app.add_exception_handler(429, _rate_limit_exceeded_handler)
+import os
+_backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_free_dir = os.path.join(_backend_root, "chatbot_free")
+_pro_dir = os.path.join(_backend_root, "chatbot_pro")
 
-app.mount("/static/chatbot_free", StaticFiles(directory="chatbot_free"), name="chatbot-free-static")
-app.mount("/static/chatbot_pro", StaticFiles(directory="chatbot_pro"), name="chatbot-pro-static")
+if os.path.exists(_free_dir):
+    app.mount("/static/chatbot_free", StaticFiles(directory=_free_dir), name="chatbot-free-static")
+if os.path.exists(_pro_dir):
+    app.mount("/static/chatbot_pro", StaticFiles(directory=_pro_dir), name="chatbot-pro-static")
 
 
 app.add_middleware(
@@ -122,6 +147,7 @@ app.include_router(routes_router)
 app.include_router(webhooks_router)
 app.include_router(oauth_router)
 app.include_router(chatbot_router)
+app.include_router(dashboard_router)
 for _agent_router in _load_agent_routers():
     app.include_router(_agent_router)
 

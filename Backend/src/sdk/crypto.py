@@ -7,7 +7,9 @@
 # USED BY: backend api.py (encrypt on save), agent handler (decrypt on read)
 # ═══════════════════════════════════════════════════════════════
 
+import os
 import logging
+from typing import Optional
 from cryptography.fernet import Fernet
 
 logger = logging.getLogger(__name__)
@@ -22,36 +24,38 @@ def _derive_key(raw_key: str) -> bytes:
     return base64.urlsafe_b64encode(digest)
 
 
-# ─── encrypt_token ────────────────────────────────────────────
-# Encrypt a plaintext Shopify access token.
-# Returns encrypted base64 string, or plaintext if no key set.
+def _get_fernet_key(key: Optional[str] = None) -> bytes:
+    """Retrieve key from argument, ENCRYPTION_KEY, or SECRET_KEY env variable."""
+    effective_key = key or os.getenv("ENCRYPTION_KEY") or os.getenv("SECRET_KEY") or "autofte-secure-default-encryption-key-32chars"
+    return _derive_key(effective_key)
 
-def encrypt_token(plaintext: str, key: str) -> str:
-    """Encrypt token with Fernet symmetric cipher.
-    If key is empty, returns plaintext (dev mode fallback)."""
-    if not key:
-        logger.warning("ENCRYPTION_KEY not set — token stored as plaintext!")
-        return plaintext
+
+# ─── encrypt_token ────────────────────────────────────────────
+
+def encrypt_token(plaintext: str, key: Optional[str] = None) -> str:
+    """Encrypt token with Fernet symmetric cipher."""
+    if not plaintext:
+        return ""
     try:
-        f = Fernet(_derive_key(key))
+        derived_key = _get_fernet_key(key)
+        f = Fernet(derived_key)
         return f.encrypt(plaintext.encode()).decode()
     except Exception as e:
         logger.error(f"Token encryption failed: {e}")
-        return plaintext
+        raise ValueError(f"Crypto error: Unable to securely encrypt token: {e}")
 
 
 # ─── decrypt_token ────────────────────────────────────────────
-# Decrypt a previously encrypted token.
-# Falls back to plaintext if token wasn't encrypted (migration).
 
-def decrypt_token(ciphertext: str, key: str) -> str:
+def decrypt_token(ciphertext: str, key: Optional[str] = None) -> str:
     """Decrypt Fernet-encrypted token.
-    Falls back to plaintext if token not encrypted (legacy data)."""
-    if not key:
-        return ciphertext
+    Falls back gracefully if token was stored in plain text."""
+    if not ciphertext:
+        return ""
     try:
-        f = Fernet(_derive_key(key))
+        derived_key = _get_fernet_key(key)
+        f = Fernet(derived_key)
         return f.decrypt(ciphertext.encode()).decode()
     except Exception:
-        # Not encrypted or wrong key — return as-is (legacy fallback)
+        # Backward compatibility fallback if token was plain text
         return ciphertext

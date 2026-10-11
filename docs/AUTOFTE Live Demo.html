@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AUTOFTE Live Demo</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#0b0f1a;--card:#151b2e;--line:#27304d;--tx:#f4f7ff;--mu:#aab4d0;--cy:#00e5ff;--pu:#8b5cf6;--gn:#22d3a6;--or:#f59e0b;--pk:#ec4899;--bl:#3b82f6}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f7ff;--card:#fff;--line:#d5dcf0;--tx:#0b0f1a;--mu:#55607f;--cy:#0097b2;--gn:#0f9d7a}}
+:root[data-theme="light"]{--bg:#f4f7ff;--card:#fff;--line:#d5dcf0;--tx:#0b0f1a;--mu:#55607f;--cy:#0097b2;--gn:#0f9d7a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Calibri,Arial,sans-serif;font-size:16px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;font-size:24px;color:var(--cy);letter-spacing:1px}
+.badge{font-size:12px;color:var(--or);border:1px solid var(--or);border-radius:20px;padding:3px 10px;margin-left:10px;font-weight:600}
+select,button,input{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 14px}
+button{cursor:pointer}button:hover{border-color:var(--cy)}
+nav{display:flex;gap:8px;padding:14px 24px;overflow-x:auto}
+nav button.on{background:var(--cy);color:#0b0f1a;border-color:var(--cy);font-weight:700}
+main{padding:8px 24px 40px;max-width:1100px;margin:0 auto}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.kpi b{display:block;font-size:30px;margin-top:6px}.mu{color:var(--mu);font-size:14px}
+.agent h3{margin:0 0 6px;font-size:18px}.agent p{margin:0 0 12px;color:var(--mu);font-size:14px;min-height:40px}
+.agent button{width:100%;font-weight:700}
+.log{background:#05070e;color:#9ef7d9;font-family:Consolas,monospace;font-size:14px;border-radius:12px;padding:14px;min-height:150px;margin-top:16px;white-space:pre-wrap;border:1px solid var(--line)}
+.chat{display:flex;flex-direction:column;height:430px}
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
+.m{max-width:80%;padding:10px 14px;border-radius:14px;line-height:1.4}
+.u{align-self:flex-end;background:var(--pu);color:#fff}.b{align-self:flex-start;background:var(--bg);border:1px solid var(--line)}
+.row{display:flex;gap:8px;margin-top:10px}.row input{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.chips button{font-size:14px;padding:6px 12px}
+.hide{display:none}h2{margin:10px 0 14px}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--gn)}
+</style></head><body>
+<header><div><span class="logo">AUTOFTE</span><span class="badge">DEMO DATA</span></div>
+<label class="mu">Connected store: <select id="store"></select></label></header>
+<nav id="tabs"></nav>
+<main>
+<section id="t0"><h2>Dashboard</h2><div class="grid" id="kpis"></div>
+<div class="card" style="margin-top:16px"><div class="mu">Inventory health</div><b id="invtxt" style="font-size:20px"></b><div class="bar"><i id="invbar"></i></div></div></section>
+<section id="t1" class="hide"><h2>AI Agents</h2><div class="grid" id="agents"></div><div class="log" id="log">Kisi agent pe "Run" dabayein...</div></section>
+<section id="t2" class="hide"><h2>Pro Chatbot <span class="mu">(English / Urdu / Roman Urdu)</span></h2>
+<div class="card chat"><div class="msgs" id="msgs"></div>
+<div class="chips" id="chips"></div>
+<div class="row"><input id="inp" placeholder="Type karein..." autocomplete="off"><button id="send">Send</button></div></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const stores={Shopify:{rev:"$12,480",ord:142,low:7,resp:"1.2 min",inv:86},WooCommerce:{rev:"$8,930",ord:98,low:12,resp:"1.8 min",inv:74},Daraz:{rev:"Rs 1.9M",ord:215,low:5,resp:"0.9 min",inv:91},Amazon:{rev:"$21,300",ord:260,low:9,resp:"1.5 min",inv:82},BigCommerce:{rev:"$6,120",ord:64,low:3,resp:"1.1 min",inv:93}};
+Object.keys(stores).forEach(k=>$("store").add(new Option(k,k)));
+function kpi(){const s=stores[$("store").value];
+$("kpis").innerHTML=[["Sales (7 days)",s.rev,"var(--cy)"],["Orders",s.ord,"var(--pu)"],["Low-stock items",s.low,"var(--or)"],["Avg. support reply",s.resp,"var(--gn)"]].map(a=>`<div class="card kpi"><span class="mu">${a[0]}</span><b style="color:${a[2]}">${a[1]}</b></div>`).join("");
+$("invtxt").textContent=s.inv+"% items healthy";$("invbar").style.width=s.inv+"%";}
+$("store").onchange=kpi;kpi();
+const tabs=["Dashboard","AI Agents","Pro Chatbot"];
+tabs.forEach((t,i)=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>{tabs.forEach((_,j)=>{$("t"+j).classList.toggle("hide",j!==i);$("tabs").children[j].classList.toggle("on",j===i)})};$("tabs").appendChild(b)});
+$("tabs").children[0].classList.add("on");
+const agents=[
+["Inventory Sync","Products, stock aur orders sync",["Connecting to {S}...","Fetched 248 products, 31 new orders","Stock updated in PostgreSQL","7 items low stock: alert bhej diya","Done: sync complete"]],
+["Content & Scheduling","Social posts likhna aur schedule",["Top product choose kiya (best seller)","Gemini se 3 captions generate hue","Post 1: Fri 7:00 PM | Post 2: Sat 12:00 PM | Post 3: Sun 8:00 PM","Done: 3 posts scheduled"]],
+["Support & Comments","24/7 replies, 3 languages",["12 naye comments mile","Classify: 8 question, 3 praise, 1 complaint","Roman Urdu mein 8 replies ready","Complaint human team ko escalate kiya","Done: 11 replies sent"]],
+["SEO Insights","Audit aur keywords",["Scanning {S} product pages...","14 pages mein meta description missing","Keyword suggest: 'organic cotton shirt', 'summer lawn suit'","Done: 5 quick wins mil gaye"]],
+["Analytics & KPI","Sales aur growth insights",["Last 7 days ka data load hua","Sales +18% vs pichla hafta","Best day: Saturday | Best product: Classic Tee","Done: weekly report ready"]],
+["Workflow Orchestration","Multi-agent tasks chalana",["Workflow: Weekly Growth Run","Step 1: Inventory Sync OK","Step 2: SEO Insights OK","Step 3: Content Scheduling OK","Step 4: Analytics Report OK","Done: 4/4 agents complete"]]];
+const cols=["--cy","--pu","--gn","--or","--pk","--bl"];let busy=false;
+$("agents").innerHTML=agents.map((a,i)=>`<div class="card agent" style="border-top:3px solid var(${cols[i]})"><h3>${i+1}. ${a[0]}</h3><p>${a[1]}</p><button data-i="${i}">Run agent</button></div>`).join("");
+$("agents").onclick=e=>{const i=e.target.dataset.i;if(i===undefined||busy)return;busy=true;const L=$("log");L.textContent="> "+agents[i][0]+" started\n";
+agents[i][2].forEach((l,j)=>setTimeout(()=>{L.textContent+="  "+l.replace("{S}",$("store").value)+"\n";if(j===agents[i][2].length-1)busy=false},700*(j+1)))};
+function lang(t){if(/[\u0600-\u06FF]/.test(t))return"ur";if(/\b(kitna|kitne|hai|mera|meri|kya|nahi|karo|batao|ka|ki|ko|aaj|kal)\b/i.test(t))return"ru";return"en"}
+const R={
+stock:{en:"Classic Tee: 42 in stock, Denim Jacket: 3 left (low). I've alerted you to restock.",ru:"Classic Tee ka stock 42 hai, Denim Jacket sirf 3 bachi hain (low). Restock alert bhej diya hai.",ur:"کلاسک ٹی کا اسٹاک 42 ہے، ڈینم جیکٹ صرف 3 باقی ہیں۔ ری اسٹاک الرٹ بھیج دیا ہے۔"},
+sales:{en:"Today: 23 orders, $1,840 in sales. Up 18% vs last week.",ru:"Aaj 23 orders aaye, total sales $1,840. Pichle hafte se 18% zyada.",ur:"آج 23 آرڈرز آئے، کل سیلز $1,840۔ پچھلے ہفتے سے 18 فیصد زیادہ۔"},
+seo:{en:"14 pages are missing meta descriptions. Top keyword to target: 'summer lawn suit'.",ru:"14 pages ki meta description missing hai. Best keyword: 'summer lawn suit'.",ur:"14 صفحات میں میٹا ڈسکرپشن موجود نہیں۔ بہترین کی ورڈ: 'summer lawn suit'۔"},
+post:{en:"Scheduled 3 posts for the Classic Tee: Fri 7 PM, Sat 12 PM, Sun 8 PM.",ru:"Classic Tee ke 3 posts schedule kar diye: Friday 7 PM, Saturday 12 PM, Sunday 8 PM.",ur:"کلاسک ٹی کی 3 پوسٹس شیڈول کر دی ہیں: جمعہ 7، ہفتہ 12، اتوار 8۔"},
+order:{en:"Order #1042 is out for delivery, arriving tomorrow.",ru:"Order #1042 delivery ke liye nikal chuka hai, kal tak pahunch jayega.",ur:"آرڈر #1042 ڈیلیوری کے لیے نکل چکا ہے، کل تک پہنچ جائے گا۔"},
+def:{en:"I can check stock, sales, SEO, posts and orders. Try one of the buttons below.",ru:"Main stock, sales, SEO, posts aur orders check kar sakta hun. Neeche buttons try karein.",ur:"میں اسٹاک، سیلز، ایس ای او، پوسٹس اور آرڈرز دیکھ سکتا ہوں۔"}};
+function intent(t){t=t.toLowerCase();if(/stock|inventory|اسٹاک/.test(t))return"stock";if(/sale|revenue|sales|سیلز/.test(t))return"sales";if(/seo|keyword|ایس/.test(t))return"seo";if(/post|content|caption|پوسٹ/.test(t))return"post";if(/order|delivery|ڈیلیوری|آرڈر/.test(t))return"order";return"def"}
+function add(c,t){const d=document.createElement("div");d.className="m "+c;d.textContent=t;$("msgs").appendChild(d);$("msgs").scrollTop=1e9}
+function ask(t){t=t.trim();if(!t)return;add("u",t);$("inp").value="";setTimeout(()=>add("b",R[intent(t)][lang(t)]),600)}
+add("b","Salam! Main AUTOFTE Pro assistant hun. Aap English, Urdu ya Roman Urdu mein pooch sakte hain.");
+["Mera stock kitna hai?","Aaj ki sales batao","What is my SEO status?","Create posts for my best seller","Order kahan hai?","میرا اسٹاک کتنا ہے؟"].forEach(q=>{const b=document.createElement("button");b.textContent=q;b.onclick=()=>ask(q);$("chips").appendChild(b)});
+$("send").onclick=()=>ask($("inp").value);$("inp").onkeydown=e=>{if(e.key==="Enter")ask($("inp").value)};
+</script></body></html>

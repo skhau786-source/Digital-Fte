@@ -9,7 +9,7 @@
 
 
 /* =========================================================
-   FLOATING ROBOT
+   FLOATING ROBOT LAUNCHER
    ========================================================= */
 
 .dfte-launcher {
@@ -37,7 +37,7 @@
     justify-content: center;
 
     box-shadow:
-        0 8px 30px rgba(255, 193, 7, 0.35);
+        0 8px 30px rgba(255, 193, 7, 0.45);
 
     transition:
         transform 0.2s ease,
@@ -46,20 +46,21 @@
 
 
 .dfte-launcher:hover {
-    transform: scale(1.06);
+    transform: scale(1.08);
 
     box-shadow:
-        0 10px 35px rgba(255, 193, 7, 0.50);
+        0 12px 35px rgba(255, 193, 7, 0.60);
 }
 
 
 .dfte-launcher img {
-    width: 58px;
-    height: 58px;
+    width: 60px;
+    height: 60px;
 
     object-fit: contain;
 
     border-radius: 50%;
+    display: block;
 }
 
 

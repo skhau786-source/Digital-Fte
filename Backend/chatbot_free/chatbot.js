@@ -14,8 +14,126 @@
             )
         ) || null;
 
+    // =========================================================
+    // UNICODE HELPER
+    // =========================================================
+
+    function U(...codes) {
+        return String.fromCodePoint(...codes);
+    }
+
+    // Common characters
+    const HAND = U(0x1F44B);
+    const ENGLAND_FLAG = U(0x1F1EC, 0x1F1E7);
+    const PAKISTAN_FLAG = U(0x1F1F5, 0x1F1F0);
+    const BULLET = U(0x25CF);
+    const CLOSE = U(0x00D7);
+    const SEND = U(0x27A4);
+
+    // Urdu text
+    const URDU = {
+        label: U(
+            0x0627, 0x0631, 0x062F, 0x0648
+        ),
+
+        welcome: U(
+            0x0633, 0x0644, 0x0627, 0x0645,
+            0x0020,
+            0x0639, 0x0644, 0x06CC, 0x06A9, 0x0645,
+            0x0021,
+            0x0020,
+            0x1F44B,
+            0x0020,
+            0x0622, 0x062C,
+            0x0020,
+            0x0645, 0x06CC, 0x06BA,
+            0x0020,
+            0x0622, 0x067E,
+            0x0020,
+            0x06A9, 0x06CC,
+            0x0020,
+            0x06A9, 0x06CC, 0x0633, 0x06D2,
+            0x0020,
+            0x0645, 0x062F, 0x062F,
+            0x0020,
+            0x06A9, 0x0631,
+            0x0020,
+            0x0633, 0x06A9, 0x062A, 0x0627,
+            0x0020,
+            0x06C1, 0x0648, 0x06BA,
+            0x061F
+        ),
+
+        placeholder: U(
+            0x0627, 0x067E, 0x0646, 0x0627,
+            0x0020,
+            0x0633, 0x0648, 0x0627, 0x0644,
+            0x0020,
+            0x0644, 0x06A9, 0x06BE, 0x06CC, 0x06BA,
+            0x002E, 0x002E, 0x002E
+        ),
+
+        title: U(
+            0x0688, 0x06CC, 0x062C, 0x06CC,
+            0x0679, 0x0644,
+            0x0020,
+            0x0627, 0x06CC,
+            0x0020,
+            0x0622, 0x0626, 0x06CC,
+            0x0020,
+            0x0627, 0x0633, 0x0633, 0x0633, 0x0679, 0x0646, 0x0679
+        ),
+
+        online: U(
+            0x25CF,
+            0x0020,
+            0x0622, 0x0646,
+            0x0020,
+            0x0644, 0x0627, 0x0626, 0x0646
+        ),
+
+        thinking: U(
+            0x0633, 0x0648, 0x0686,
+            0x0020,
+            0x0631, 0x06C1, 0x0627,
+            0x0020,
+            0x06C1, 0x0648, 0x06BA,
+            0x002E, 0x002E, 0x002E
+        ),
+
+        error: U(
+            0x0645, 0x0639, 0x0630, 0x0631, 0x062A,
+            0x060C,
+            0x0020,
+            0x06A9, 0x0686, 0x06BE,
+            0x0020,
+            0x0645, 0x0633, 0x0626, 0x0644, 0x06C1,
+            0x0020,
+            0x067E, 0x06CC, 0x0634,
+            0x0020,
+            0x0622, 0x06CC, 0x0627,
+            0x06D4,
+            0x0020,
+            0x0628, 0x0631, 0x0627, 0x06C1,
+            0x0020,
+            0x06A9, 0x0631, 0x0645,
+            0x0020,
+            0x062F, 0x0648, 0x0628, 0x0627, 0x0631, 0x06C1,
+            0x0020,
+            0x06A9, 0x0648, 0x0634, 0x0634,
+            0x0020,
+            0x06A9, 0x0631, 0x06CC, 0x06BA,
+            0x06D4
+        )
+    };
+
+    // =========================================================
+    // GET JWT
+    // =========================================================
+
     function getToken() {
         const possibleKeys = [
+            "digital_fte_token",
             "access_token",
             "token",
             "jwt"
@@ -33,7 +151,12 @@
         return null;
     }
 
+    // =========================================================
+    // CREATE CHATBOT
+    // =========================================================
+
     function createChatbot() {
+
         if (
             document.getElementById(
                 "dfte-chatbot-root"
@@ -49,16 +172,16 @@
             "dfte-chatbot-root";
 
         root.innerHTML = `
-            <!-- ROBOT BUTTON -->
+            <!-- FLOATING ROBOT -->
             <button
                 id="dfte-launcher"
                 class="dfte-launcher"
-                aria-label="Open Digital FTE chatbot"
+                aria-label="Open AUTO-FTE chatbot"
                 type="button"
             >
                 <img
                     src="/chatbot_free/digital_fte_robot.png"
-                    alt="Digital FTE AI Assistant"
+                    alt="AUTO-FTE AI Assistant"
                 >
             </button>
 
@@ -67,7 +190,7 @@
                 id="dfte-greeting"
                 class="dfte-greeting"
             >
-                Hi! &#x1F44B; How can I help you?
+                Hi! ${HAND} How can I help you?
             </div>
 
             <!-- CHAT WINDOW -->
@@ -75,6 +198,7 @@
                 id="dfte-window"
                 class="dfte-window"
             >
+
                 <!-- HEADER -->
                 <div class="dfte-header">
 
@@ -82,19 +206,21 @@
 
                         <div class="dfte-logo">
                             <img
-                                src="/chatbot_free/digital_fte_robot.png"
-                                alt="Digital FTE"
+                                src="/images/logo.jpeg"
+                                alt="AUTO-FTE"
                             >
                         </div>
 
                         <div>
+
                             <div class="dfte-title">
-                                Digital FTE AI Assistant
+                                AUTO-FTE AI Assistant
                             </div>
 
                             <div class="dfte-status">
-                                &#x25CF; Online
+                                ${BULLET} Online
                             </div>
+
                         </div>
 
                     </div>
@@ -105,8 +231,9 @@
                         aria-label="Close chatbot"
                         type="button"
                     >
-                        &#x00D7;
+                        ${CLOSE}
                     </button>
+
                 </div>
 
                 <!-- BODY -->
@@ -120,12 +247,13 @@
                         id="dfte-language-screen"
                         class="dfte-language-screen"
                     >
+
                         <h3>
-                            Hi! &#x1F44B;
+                            Hi! ${HAND}
                         </h3>
 
                         <p>
-                            I'm your Digital FTE AI Assistant.
+                            I'm your AUTO-FTE AI Assistant.
                             I can answer questions about the
                             platform and your connected store.
                         </p>
@@ -138,11 +266,13 @@
                             <span>
                                 Please select your language:
                             </span>
+
                         </div>
 
                         <div
                             class="language-buttons"
                         >
+
                             <!-- ENGLISH -->
                             <button
                                 class="dfte-language-btn"
@@ -150,7 +280,7 @@
                                 type="button"
                             >
                                 <span class="flag">
-                                    &#x1F1EC;&#x1F1E7;
+                                    ${ENGLAND_FLAG}
                                 </span>
 
                                 <span>
@@ -165,11 +295,11 @@
                                 type="button"
                             >
                                 <span class="flag">
-                                    &#x1F1F5;&#x1F1F0;
+                                    ${PAKISTAN_FLAG}
                                 </span>
 
                                 <span>
-                                    &#x0627;&#x0631;&#x062F;&#x0648;
+                                    ${URDU.label}
                                 </span>
                             </button>
 
@@ -180,14 +310,16 @@
                                 type="button"
                             >
                                 <span class="flag">
-                                    &#x1F1F5;&#x1F1F0;
+                                    ${PAKISTAN_FLAG}
                                 </span>
 
                                 <span>
                                     Roman Urdu
                                 </span>
                             </button>
+
                         </div>
+
                     </div>
 
                     <!-- MESSAGES -->
@@ -195,6 +327,7 @@
                         id="dfte-messages"
                         class="dfte-messages"
                     ></div>
+
                 </div>
 
                 <!-- FOOTER -->
@@ -203,6 +336,7 @@
                     class="dfte-footer"
                     style="display: none;"
                 >
+
                     <div class="dfte-input-row">
 
                         <textarea
@@ -218,15 +352,17 @@
                             type="button"
                             aria-label="Send message"
                         >
-                            &#x27A4;
+                            ${SEND}
                         </button>
 
                     </div>
 
                     <div class="dfte-footer-text">
-                        Free Plan · Read-only assistant
+                        Free Plan - Read-only assistant
                     </div>
+
                 </div>
+
             </div>
         `;
 
@@ -339,12 +475,18 @@
                         event.key === "Enter" &&
                         !event.shiftKey
                     ) {
+
                         event.preventDefault();
+
                         sendMessage();
                     }
                 }
             );
     }
+
+    // =========================================================
+    // LANGUAGE SELECTION
+    // =========================================================
 
     function selectLanguage(language) {
 
@@ -385,13 +527,17 @@
         const welcomeMessages = {
 
             english:
-                "Hi! \uD83D\uDC4B How can I help you today?",
+                "Hi! " +
+                HAND +
+                " How can I help you today?",
 
             urdu:
-                "\u0633\u0644\u0627\u0645 \u0639\u0644\u06CC\u06A9\u0645! \uD83D\uDC4B \u0622\u062C \u0645\u06CC\u06BA \u0622\u067E \u06A9\u06CC \u06A9\u06CC\u0633\u06D2 \u0645\u062F\u062F \u06A9\u0631 \u0633\u06A9\u062A\u0627 \u06C1\u0648\u06BA\u061F",
+                URDU.welcome,
 
             roman_urdu:
-                "Assalam-o-Alaikum! \uD83D\uDC4B Aaj main aapki kis tarah madad kar sakta hoon?"
+                "Assalam-o-Alaikum! " +
+                HAND +
+                " Aaj main aapki kis tarah madad kar sakta hoon?"
         };
 
         const placeholders = {
@@ -400,22 +546,19 @@
                 "Ask something...",
 
             urdu:
-                "\u0627\u067E\u0646\u0627 \u0633\u0648\u0627\u0644 \u0644\u06A9\u06BE\u06CC\u06BA...",
+                URDU.placeholder,
 
             roman_urdu:
                 "Apna sawal likhein..."
         };
 
-        if (
-            language ===
-            "urdu"
-        ) {
+        if (language === "urdu") {
 
             title.textContent =
-                "\u0688\u06CC\u062C\u06CC\u0679\u0644 \u0627\u06CC \u0622\u0626\u06CC \u0627\u0633\u0633\u0679\u0646\u0679";
+                URDU.title;
 
             status.textContent =
-                "\u25CF \u0622\u0646 \u0644\u0627\u0626\u0646";
+                URDU.online;
 
             input.dir =
                 "rtl";
@@ -429,7 +572,8 @@
                 "Digital FTE AI Assistant";
 
             status.textContent =
-                "\u25CF Online";
+                BULLET +
+                " Online";
 
             input.dir =
                 "ltr";
@@ -447,6 +591,10 @@
         );
     }
 
+    // =========================================================
+    // ADD MESSAGE
+    // =========================================================
+
     function addMessage(
         type,
         text
@@ -463,7 +611,8 @@
             );
 
         message.className =
-            "dfte-message " + type;
+            "dfte-message " +
+            type;
 
         const bubble =
             document.createElement(
@@ -513,6 +662,10 @@
         scrollToBottom();
     }
 
+    // =========================================================
+    // TYPING
+    // =========================================================
+
     function addTyping() {
 
         const messages =
@@ -541,7 +694,7 @@
 
         bubble.textContent =
             selectedLanguage === "urdu"
-                ? "\u0633\u0648\u0686 \u0631\u06C1\u0627 \u06C1\u0648\u06BA..."
+                ? URDU.thinking
                 : selectedLanguage === "roman_urdu"
                     ? "Soch raha hoon..."
                     : "Thinking...";
@@ -583,6 +736,10 @@
             typing.remove();
         }
     }
+
+    // =========================================================
+    // SEND MESSAGE
+    // =========================================================
 
     async function sendMessage() {
 
@@ -658,7 +815,6 @@
 
                         body:
                             JSON.stringify({
-
                                 query:
                                     query,
 
@@ -700,7 +856,13 @@
                 "bot",
                 result.answer ||
                 result.message ||
-                "Request processed."
+                (
+                    selectedLanguage === "urdu"
+                        ? URDU.error
+                        : selectedLanguage === "roman_urdu"
+                            ? "Request processed successfully."
+                            : "Request processed successfully."
+                )
             );
 
         } catch (error) {
@@ -713,7 +875,7 @@
                     "Sorry, something went wrong. Please try again.",
 
                 urdu:
-                    "\u0645\u0639\u0630\u0631\u062A\u060C \u06A9\u0686\u06BE \u0645\u0633\u0626\u0644\u06C1 \u067E\u06CC\u0634 \u0622\u06CC\u0627\u06D4 \u0628\u0631\u0627\u06C1 \u06A9\u0631\u0645 \u062F\u0648\u0628\u0627\u0631\u06C1 \u06A9\u0648\u0634\u0634 \u06A9\u0631\u06CC\u06BA\u06D4",
+                    URDU.error,
 
                 roman_urdu:
                     "Sorry, kuch masla hogaya. Dobara try karein."
@@ -740,6 +902,10 @@
         }
     }
 
+    // =========================================================
+    // SCROLL
+    // =========================================================
+
     function scrollToBottom() {
 
         const body =
@@ -747,9 +913,15 @@
                 "dfte-body"
             );
 
-        body.scrollTop =
-            body.scrollHeight;
+        if (body) {
+            body.scrollTop =
+                body.scrollHeight;
+        }
     }
+
+    // =========================================================
+    // INITIALIZE
+    // =========================================================
 
     if (
         document.readyState ===
