@@ -393,7 +393,7 @@
                 <div
                     class="dfte-pro-footer-text"
                 >
-                    Digital FTE Pro - AI Agent
+                    AUTO-FTE Pro - AI Agent
                 </div>
 
             </footer>
@@ -595,14 +595,14 @@
                             message =
                                 "Assalam-o-Alaikum! " +
                                 HAND +
-                                " Main aapka Digital FTE Pro Agent hoon. Batayein aap apne connected store mein kya karwana chahte hain?";
+                                " Main aapka AUTO-FTE Pro Agent hoon. Batayein aap apne connected store mein kya karwana chahte hain?";
 
                         } else {
 
                             message =
                                 "Hi! " +
                                 HAND +
-                                " I'm your Digital FTE Pro Agent. Tell me what you'd like me to do, and I'll handle it for you.";
+                                " I'm your AUTO-FTE Pro Agent. Tell me what you'd like me to do, and I'll handle it for you.";
                         }
 
                         addMessage(
@@ -940,7 +940,7 @@
             );
 
             console.error(
-                "Digital FTE Pro Agent:",
+                "AUTO-FTE Pro Agent:",
                 error
             );
 

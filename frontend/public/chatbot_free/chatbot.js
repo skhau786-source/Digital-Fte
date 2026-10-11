@@ -73,10 +73,7 @@
             0x002E, 0x002E, 0x002E
         ),
 
-        title: U(
-            0x0688, 0x06CC, 0x062C, 0x06CC,
-            0x0679, 0x0644,
-            0x0020,
+        title: "AUTO-FTE " + U(
             0x0627, 0x06CC,
             0x0020,
             0x0622, 0x0626, 0x06CC,
@@ -569,7 +566,7 @@
         } else {
 
             title.textContent =
-                "Digital FTE AI Assistant";
+                "AUTO-FTE AI Assistant";
 
             status.textContent =
                 BULLET +
@@ -889,7 +886,7 @@
             );
 
             console.error(
-                "Digital FTE Chatbot:",
+                "AUTO-FTE Chatbot:",
                 error
             );
 

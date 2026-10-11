@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 
@@ -69,7 +69,7 @@ export function ChatbotLoader() {
     script.dataset.chatbotPlan = plan;
 
     script.onload = () => {
-      console.log("Digital FTE chatbot loaded:", plan);
+      console.log("AUTO-FTE chatbot loaded:", plan);
 
       // Global click/touch listener setup
       const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
