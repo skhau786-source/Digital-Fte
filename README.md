@@ -84,7 +84,12 @@ AUTO-FTE unifies a modern Next.js 15 presentation layer, a high-performance asyn
 ```text
 Digital-Fte-Startup-main/
 ├── README.md                      # Master Project Documentation (Single Source of Truth)
+├── docker-compose.yml             # Unified Docker Compose (Frontend, Backend, PostgreSQL, Redis)
+├── START_DOCKER.ps1               # 1-Click full-stack Docker stack launcher script
+├── START_LOCAL.ps1                # Local development launcher script (Local Python + Docker DB)
 ├── Backend/                       # FastAPI Asynchronous REST Backend
+│   ├── Dockerfile                 # Backend container definition (Python 3.11-slim)
+│   ├── .dockerignore              # Excludes virtual environments and SQLite test db
 │   ├── .env                       # Environment configuration (DB, Redis, Secrets, Gemini)
 │   ├── requirements.txt           # Python dependencies (FastAPI, SQLAlchemy, asyncpg, etc.)
 │   └── src/
@@ -101,6 +106,8 @@ Digital-Fte-Startup-main/
 │           ├── event_bus.py       # Redis async Pub/Sub event bus
 │           └── models/            # SQLAlchemy ORM models (Base, Store, Order, Product, Settings)
 ├── frontend/                      # Next.js 15 App Router Frontend
+│   ├── Dockerfile                 # Multi-stage production container definition (Node 20-alpine)
+│   ├── .dockerignore              # Excludes node_modules, .next, and local env files
 │   ├── package.json               # Node dependencies (Next 15, React 19, Lucide, Tailwind)
 │   ├── .env.local                 # Frontend environment variables (API URL, Google Client ID)
 │   ├── public/                    # Static assets, branding, and robot animations
@@ -131,7 +138,41 @@ Digital-Fte-Startup-main/
 
 ---
 
-## 🚀 Quickstart & Local Setup
+## 🚀 Quickstart & Setup Options
+
+### 🐳 Option A: 1-Click Full Stack with Docker (Recommended)
+
+Run the entire ecosystem (**Frontend + Backend + PostgreSQL + Redis**) with a single command from the project root:
+
+```bash
+# Start all 4 containers with live build:
+docker compose up --build
+
+# Or run in detached background mode:
+docker compose up -d --build
+```
+
+**Alternatively, use the PowerShell shortcut:**
+```powershell
+.\START_DOCKER.ps1
+```
+
+**Services launched:**
+- 🖥️ **Frontend (Next.js 15):** [http://localhost:3000](http://localhost:3000)
+- ⚡ **Backend API (FastAPI):** [http://localhost:8000](http://localhost:8000)
+- 📖 **Interactive Swagger Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- 🐘 **PostgreSQL 16:** `localhost:5434` (internal container port `5432`)
+- 🔴 **Redis 7 Event Bus:** `localhost:6380` (internal container port `6379`)
+
+> [!TIP]
+> If you prefer developing the frontend locally with instant hot-reload, start only the core services:
+> ```bash
+> docker compose up --build backend postgres redis
+> ```
+
+---
+
+### 💻 Option B: Manual Local Setup
 
 ### 1. Prerequisites
 - **Node.js** >= 18.17.0

@@ -34,9 +34,10 @@ else:
     elif db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 
-    # Configure SSL context for Neon/cloud PostgreSQL if not localhost
+    # Configure SSL context for Neon/cloud PostgreSQL if not local or Docker container
     connect_args = {}
-    if "asyncpg" in db_url and "localhost" not in db_url and "127.0.0.1" not in db_url:
+    is_local_db = any(h in db_url for h in ["localhost", "127.0.0.1", "@postgres", "@db"])
+    if "asyncpg" in db_url and not is_local_db and ("neon.tech" in db_url or "ssl" in settings.DATABASE_URL.lower()):
         ssl_ctx = ssl.create_default_context()
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_NONE

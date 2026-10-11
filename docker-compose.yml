@@ -1,0 +1,83 @@
+# =============================================================
+# AUTO-FTE (Digital FTE) — Unified Multi-Container Stack
+# Services: PostgreSQL 16, Redis 7, FastAPI Backend, Next.js Frontend
+#
+# Usage:
+#   Full Stack: docker compose up --build
+#   Core Only:  docker compose up --build backend postgres redis
+# =============================================================
+
+name: auto_fte
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: auto_fte_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: digital_fte
+    ports:
+      - "5434:5432"
+    volumes:
+      - auto_fte_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d digital_fte"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: auto_fte_redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: auto_fte_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./Backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/digital_fte
+      REDIS_URL: redis://redis:6379/0
+      BACKEND_PUBLIC_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:3000
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+        NEXT_PUBLIC_CHATBOT_PLAN: free
+    container_name: auto_fte_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  auto_fte_postgres_data:
