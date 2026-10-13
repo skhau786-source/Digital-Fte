@@ -9,12 +9,10 @@ import {
   Bot,
   ArrowRight,
   Database,
-  Sparkles,
-  RefreshCw,
   Clock,
 } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
-import { getDashboardOverview, seedDashboardData } from "@/app/lib/api";
+import { getDashboardOverview } from "@/app/lib/api";
 import { useToast } from "@/app/components/providers/ToastProvider";
 import { ConnectStoreModal } from "@/app/components/dashboard/modals/ConnectStoreModal";
 
@@ -47,7 +45,6 @@ export default function OverviewPage() {
   const { showToast } = useToast();
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [subTab, setSubTab] = useState<"Leads" | "Orders" | "AI Studio" | "Logs">("Leads");
   const [leadFilter, setLeadFilter] = useState<string>("All");
@@ -74,19 +71,6 @@ export default function OverviewPage() {
       }
     }
   }, []);
-
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      const res = await seedDashboardData();
-      showToast(res.message || "Database seeded with sample store data!", "success");
-      await loadData();
-    } catch {
-      showToast("Failed to seed data. Please check backend connection.", "error");
-    } finally {
-      setSeeding(false);
-    }
-  };
 
   const revenue = data ? Number(data.revenue_today || 0) : 0;
   const orders = data ? Number(data.total_orders || 0) : 0;
@@ -122,22 +106,6 @@ export default function OverviewPage() {
               <ShoppingBag className="w-4 h-4" />
               <span>Connect Store</span>
             </button>
-
-            {data?.is_demo && (
-              <button
-                onClick={handleSeed}
-                disabled={seeding}
-                className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                title="Populate your Neon database with realistic products and orders"
-              >
-                {seeding ? (
-                  <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
-                ) : (
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                )}
-                <span>{seeding ? "Seeding Neon DB..." : "Seed Neon Data"}</span>
-              </button>
-            )}
 
             <Link
               href="/dashboard/agents"
@@ -640,15 +608,6 @@ export default function OverviewPage() {
         ) : (
           <div className="text-center py-8">
             <p className="text-sm text-slate-500 mb-3">No orders found in your store database yet.</p>
-            {data?.is_demo ? (
-              <button
-                onClick={handleSeed}
-                disabled={seeding}
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all cursor-pointer"
-              >
-                Seed Sample Store Data
-              </button>
-            ) : (
               <button
                 onClick={() => setShowConnectModal(true)}
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:shadow-md text-[#06111b] font-bold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer"
@@ -656,7 +615,6 @@ export default function OverviewPage() {
                 <ShoppingBag className="w-3.5 h-3.5" />
                 <span>Connect Your Store</span>
               </button>
-            )}
           </div>
         )}
       </div>

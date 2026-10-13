@@ -15,7 +15,6 @@ import {
 import {
   getDashboardProducts,
   createDashboardProduct,
-  seedDashboardData,
   getSEOAnalysisLive,
   getDashboardOverview,
 } from "@/app/lib/api";
@@ -120,19 +119,6 @@ export default function ProductsPage() {
       showToast("Failed to create product. Check backend connection.", "error");
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleSeed = async () => {
-    setLoading(true);
-    try {
-      const res = await seedDashboardData();
-      showToast(res.message || "Seeded products into Neon database!", "success");
-      await Promise.all([loadProducts(), loadSEO()]);
-    } catch {
-      showToast("Failed to seed data.", "error");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -324,19 +310,13 @@ export default function ProductsPage() {
         <div className="text-center py-12 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
           <Package className="w-10 h-10 text-slate-400 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-700">No products found in Neon database</p>
-          <p className="text-xs text-slate-500 mb-4">Add your first product or seed sample catalog data</p>
+          <p className="text-xs text-slate-500 mb-4">Add your first product, or connect a store to sync its catalog</p>
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={() => setShowAddModal(true)}
               className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs"
             >
               Add Product
-            </button>
-            <button
-              onClick={handleSeed}
-              className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs"
-            >
-              Seed Sample Products
             </button>
           </div>
         </div>
