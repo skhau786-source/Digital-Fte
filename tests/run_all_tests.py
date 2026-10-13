@@ -30,6 +30,7 @@ PHASE_DIRS = [
     ("Phase 4: Dynamic Analytics Engine", "tests/phase4_analytics"),
     ("Phase 5: Agent Guardrails & Telemetry", "tests/phase5_agents_guardrails"),
     ("Phase 6: New User Clean State & Store OAuth", "tests/phase6_new_user_isolation"),
+    ("Phase 7: Storefront Support Agent (Claude)", "tests/phase7_support_agent"),
 ]
 
 
