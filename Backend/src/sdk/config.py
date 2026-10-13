@@ -65,6 +65,23 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
     LLM_MODEL: str = "gemini-2.0-flash-exp"
 
+    # ─── Customer Support Agent (Claude) ──────────────────────────
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = ""
+    ANTHROPIC_MAX_TOKENS: int = 1024
+    CHAT_MAX_TOOL_ROUNDS: int = 6
+    CHAT_MAX_MESSAGE_CHARS: int = 1000
+    CHAT_RATE_LIMIT_MAX: int = 20
+    CHAT_RATE_LIMIT_WINDOW_SECONDS: int = 60
+    STORE_CURRENCY: str = ""  # e.g. "PKR"; shown with prices when set (variants carry no currency)
+
+    # Owner notification for handoffs (either or both; email uses SMTP_* above)
+    OWNER_NOTIFY_EMAIL: str = ""
+    OWNER_WEBHOOK_URL: str = ""
+
+    # Shopify Admin API (GraphQL) version used for order lookups
+    SHOPIFY_API_VERSION: str = "2024-01"
+
     # Encryption — protects ALL platform tokens at rest (Fernet)
     ENCRYPTION_KEY: str = ""
 

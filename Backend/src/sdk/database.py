@@ -106,3 +106,15 @@ async def init_db():
             await conn.execute(text("ALTER TABLE automation_settings ADD COLUMN IF NOT EXISTS timezone VARCHAR(50) DEFAULT 'Asia/Karachi';"))
         except Exception:
             pass
+        # Customer-support chat sessions (create_all does not alter existing tables)
+        for stmt in (
+            "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);",
+            "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS language VARCHAR(20) DEFAULT '';",
+            "CREATE UNIQUE INDEX IF NOT EXISTS ix_conversations_session_id ON conversations (session_id);",
+        ):
+            try:
+                if engine.dialect.name == "postgresql":
+                    from sqlalchemy import text
+                    await conn.execute(text(stmt))
+            except Exception:
+                pass
