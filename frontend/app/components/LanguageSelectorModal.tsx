@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../lib/LanguageContext";
 import { AppLogo } from "@/app/components/ui/AppLogo";
 
 export function LanguageSelectorModal() {
   const { showLanguageModal, setLanguage, closeLanguageModal } = useLanguage();
+  const pathname = usePathname();
 
   const handleSelect = (lang: "en" | "ur") => {
     setLanguage(lang);
@@ -23,6 +25,9 @@ export function LanguageSelectorModal() {
     }
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showLanguageModal, closeLanguageModal]);
+
+  // Customer-facing storefront pages (/store/*) have their own chat widget and no merchant UI.
+  if (pathname?.startsWith("/store")) return null;
 
   return (
     <AnimatePresence>

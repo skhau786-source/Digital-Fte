@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 type ChatbotPlan = "free" | "pro";
 
 export function ChatbotLoader() {
+  const pathname = usePathname();
+  const isStorefront = pathname?.startsWith("/store") ?? false;
+
   useEffect(() => {
+    // The merchant dashboard widget must not appear on customer storefront pages.
+    if (isStorefront) return;
     // Universal Animation Killer CSS (Targeting all potential launcher elements & keyframes)
     const styleId = "dfte-chatbot-custom-style";
     if (!document.getElementById(styleId)) {
@@ -105,7 +111,7 @@ export function ChatbotLoader() {
       document.getElementById(styleId)?.remove();
       document.body.removeAttribute("data-chat-active");
     };
-  }, []);
+  }, [isStorefront]);
 
   return null;
 }
