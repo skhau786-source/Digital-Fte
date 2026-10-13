@@ -2,7 +2,7 @@
 # agents / customer_support / shopify_storefront_client.py
 #
 # PURPOSE: Shopify Storefront API client for cart operations.
-#          Supports dev mode when token is absent or starts with mock_.
+#          Requires a real Storefront access token (no mock/dev mode).
 # ═══════════════════════════════════════════════════════════════
 
 import logging
@@ -18,25 +18,21 @@ class ShopifyStorefrontClient:
 
     def __init__(
         self,
-        shop_domain: str = "demo.myshopify.com",
+        shop_domain: str,
         access_token: str = "",
         api_url: str = "https://{shop}/api/2024-01/graphql.json",
     ):
         self.shop_domain = shop_domain
         self.access_token = access_token
         self.api_url = api_url.format(shop=shop_domain)
-        self.is_dev_mode = not bool(access_token) or access_token.startswith("mock_") or "mock" in shop_domain
+
+    def _require_token(self) -> None:
+        if not self.access_token:
+            raise RuntimeError("Shopify Storefront access token is not configured")
 
     async def create_cart(self, lines: list[dict]) -> dict:
         """Create a new cart with initial line items."""
-        if self.is_dev_mode:
-            return {
-                "status": "ok",
-                "cart_id": f"cart_mock_{uuid.uuid4().hex[:8]}",
-                "checkout_url": f"https://{self.shop_domain}/cart/mock_checkout",
-                "lines": lines,
-                "total_quantity": sum(item.get("quantity", 1) for item in lines),
-            }
+        self._require_token()
 
         mutation = """
         mutation cartCreate($input: CartInput) {
@@ -67,13 +63,7 @@ class ShopifyStorefrontClient:
 
     async def cart_lines_add(self, cart_id: str, lines: list[dict]) -> dict:
         """Add lines to an existing cart."""
-        if self.is_dev_mode:
-            return {
-                "status": "ok",
-                "cart_id": cart_id,
-                "lines_added": lines,
-                "checkout_url": f"https://{self.shop_domain}/cart/mock_checkout",
-            }
+        self._require_token()
 
         mutation = """
         mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {

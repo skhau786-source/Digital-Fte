@@ -304,7 +304,7 @@ class CustomerSupportHandler:
         # Find store
         res = await self.db.execute(select(Store).where(Store.id == store_id))
         store = res.scalar_one_or_none()
-        shop_domain = store.shop_domain if store else "demo.myshopify.com"
+        shop_domain = (store.shop_domain or "") if store else ""
 
         client = self.storefront or ShopifyStorefrontClient(
             shop_domain=shop_domain,
@@ -423,7 +423,7 @@ class CustomerSupportHandler:
             return None
 
         msg_res = await self.db.execute(
-            select(Message).where(Message.conversation_id == conversation_id).order_by(Message.created_at.asc())
+            select(Message).where(Message.conversation_id == conversation_id, Message.role != "agent_trace").order_by(Message.id.asc())
         )
         messages = msg_res.scalars().all()
 

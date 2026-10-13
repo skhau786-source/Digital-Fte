@@ -30,8 +30,15 @@ def detect_language(text: str) -> str:
     # Common Roman Urdu markers
     roman_urdu_markers = [
         "kya", "kiya", "hai", "hain", "kahan", "kitna", "kitne", "kitni",
-        "chahiye", "bhai", "batao", "mujhe", "mera", "meri", "acha",
-        "kab", "milay", "ga", "gi", "kaise", "hoga", "ap", "aap", "shukriya"
+        "chahiye", "chahie", "bhai", "batao", "bataiye", "bataye", "mujhe", "mera",
+        "meri", "mere", "acha", "achha", "theek", "kab", "milay", "milega", "milegi",
+        "ga", "gi", "kaise", "kese", "hoga", "hogi", "ap", "aap", "shukriya", "nahi",
+        "nahin", "hum", "tum", "kyun", "kyon", "kaun", "abhi", "wala", "wali", "wale",
+        "dikhao", "dikhayen", "dedo", "dena", "bhejo", "bhej", "mein", "ka", "ki", "ke",
+        "ko", "se", "aur", "lekin", "agar", "jee", "ji", "sasta", "mehnga", "qeemat",
+        "keemat", "daam", "kapra", "kapray", "joota", "jootay", "sooti",
+        "chahta", "chahti", "chahiyay", "karna", "karni", "karen", "karo", "lena",
+        "lene", "liye", "pe", "tak", "kuch", "koi", "yeh", "ye", "woh",
     ]
     words = re.findall(r"\b\w+\b", text.lower())
     matches = sum(1 for w in words if w in roman_urdu_markers)
