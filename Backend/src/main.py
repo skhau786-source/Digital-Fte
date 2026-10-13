@@ -87,12 +87,6 @@ async def lifespan(app: FastAPI):
     try:
         await init_db()
         logger.info("Database initialized successfully")
-        try:
-            from src.domains.auth.seeder import seed_demo_enterprise_user
-            await seed_demo_enterprise_user()
-            logger.info("Demo enterprise user and store verified")
-        except Exception as seed_err:
-            logger.warning(f"Could not seed demo enterprise user: {seed_err}")
     except Exception as e:
         logger.warning(f"Database not connected ({e}). Running in offline/mock mode.")
 

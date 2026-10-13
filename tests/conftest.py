@@ -17,7 +17,7 @@ os.environ["TEST_DATABASE_URL"] = f"sqlite+aiosqlite:///{TEST_DB_PATH}"
 from fastapi.testclient import TestClient
 from src.main import app
 from src.sdk.database import init_db
-from src.domains.auth.seeder import seed_demo_enterprise_user
+from tests.fixtures.demo_seed import seed_demo_enterprise_user
 
 
 @pytest.fixture(scope="session", autouse=True)

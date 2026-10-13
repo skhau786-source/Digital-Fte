@@ -1,5 +1,5 @@
 import pytest
-from src.domains.auth.seeder import DEMO_EMAIL, DEMO_PASSWORD
+from tests.fixtures.demo_seed import DEMO_EMAIL, DEMO_PASSWORD
 
 
 def test_sample_enterprise_credentials_login(client):

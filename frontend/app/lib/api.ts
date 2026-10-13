@@ -333,9 +333,3 @@ export const getDashboardOrders = () =>
 export const getDashboardCustomers = () =>
   apiFetch<any[]>("/api/v1/dashboard/customers");
 
-export const seedDashboardData = () =>
-  apiFetch<{ status: string; message: string; products_count?: number; orders_count?: number }>(
-    "/api/v1/dashboard/seed",
-    { method: "POST", body: JSON.stringify({}) }
-  );
-
