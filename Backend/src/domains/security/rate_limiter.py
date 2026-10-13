@@ -35,3 +35,34 @@ def login_rate_limiter(request: Request) -> None:
         )
 
     q.append(now)
+
+
+# ─── Storefront chat limiter ──────────────────────────────────
+# Sliding window per client IP, tunable via CHAT_RATE_LIMIT_* settings.
+
+_chat_hits: dict[str, Deque[float]] = defaultdict(deque)
+
+
+def chat_rate_limiter(request: Request) -> None:
+    settings = get_settings()
+    ip = _client_ip(request)
+    now = time.time()
+    q = _chat_hits[ip]
+
+    while q and now - q[0] > settings.CHAT_RATE_LIMIT_WINDOW_SECONDS:
+        q.popleft()
+
+    if len(q) >= settings.CHAT_RATE_LIMIT_MAX:
+        retry_after = max(1, int(settings.CHAT_RATE_LIMIT_WINDOW_SECONDS - (now - q[0])))
+        raise HTTPException(
+            status_code=429,
+            detail="You're sending messages too quickly. Please wait a moment and try again.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
+    q.append(now)
+
+
+def reset_chat_rate_limiter() -> None:
+    """Test helper."""
+    _chat_hits.clear()

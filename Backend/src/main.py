@@ -23,6 +23,7 @@ from src.domains.auth.routes import router as auth_router
 from src.domains.ecommerce import routes_router, webhooks_router, oauth_router
 from src.domains.chatbot.api import router as chatbot_router
 from src.domains.dashboard_api import router as dashboard_router
+from src.domains.agents.customer_support.storefront_api import router as storefront_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -142,6 +143,7 @@ app.include_router(webhooks_router)
 app.include_router(oauth_router)
 app.include_router(chatbot_router)
 app.include_router(dashboard_router)
+app.include_router(storefront_router)
 for _agent_router in _load_agent_routers():
     app.include_router(_agent_router)
 
