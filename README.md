@@ -274,6 +274,48 @@ Overall Evaluation Verdict: ALL TESTS PASSED (Target 9.5+/10 Verified)
 
 ---
 
+## 💬 Storefront Customer Support Agent (Claude)
+
+A customer-facing chat widget backed by a Claude tool-use agent. Customers write in English or Roman Urdu and get answers in the same language (Latin script only). Architecture of the inherited code: [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
+**Tools** (`Backend/src/domains/agents/customer_support/agent/`): `search_products`, `get_product` (live `products`/`variants` rows kept fresh by the Inventory Sync Agent; fuzzy, category, attribute and Roman Urdu search), `update_cart` (per-session cart in `carts`/`cart_items`, stock-validated, Shopify cart-permalink checkout link), `get_order_status` (Shopify Admin **GraphQL**; reveals nothing unless the order number *and* email/phone match), `handoff_to_owner` (saves to `handoffs` with contact details + transcript, then notifies the owner by email and/or webhook).
+
+**Endpoints** (public, IP rate-limited): `POST /api/v1/storefront/chat`, `GET /api/v1/storefront/chat/{session_id}?store_id=`, `GET /api/v1/storefront/{store_id}/products`. Customer page with the floating widget: `http://localhost:3000/store/<store_id>`.
+
+### Setup
+1. Backend: `cd Backend && python -m venv venv && pip install -r requirements.txt`, copy `.env.example` to `.env` and fill it in.
+2. Frontend: `cd frontend && npm install`; `.env.local` needs `NEXT_PUBLIC_API_URL`.
+3. Connect your Shopify store from the dashboard and run a sync so `products`/`variants`/`orders` hold real data.
+
+### Required `.env` keys (Backend)
+| Key | Purpose |
+|---|---|
+| `DATABASE_URL`, `SECRET_KEY`, `ENCRYPTION_KEY` | Postgres, JWT, token encryption (existing) |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | Claude API key and model id (the model is read only from here) |
+| `OWNER_NOTIFY_EMAIL` (+ `SMTP_HOST/PORT/USER/PASSWORD`, `EMAIL_FROM`) and/or `OWNER_WEBHOOK_URL` | Where handoffs are announced. Handoffs are always saved in `handoffs` even if neither is set |
+| `SHOPIFY_API_VERSION` | Admin API version for order lookup (default `2024-01`, the version already used by the repo) |
+| `STORE_CURRENCY` | Optional, e.g. `PKR`, shown next to prices |
+| `CHAT_RATE_LIMIT_MAX`, `CHAT_RATE_LIMIT_WINDOW_SECONDS`, `CHAT_MAX_MESSAGE_CHARS`, `CHAT_MAX_TOOL_ROUNDS` | Optional limits |
+
+The store's Shopify token needs `read_orders` (plus `read_all_orders` for orders older than 60 days) and approved *protected customer data* access so order email/phone can be matched.
+
+### Run
+```bash
+cd Backend && python -m uvicorn src.main:app --port 8000      # API
+cd frontend && npm run dev                                     # http://localhost:3000/store/<store_id>
+```
+No demo or seed data ships with the app: products and orders come from the Inventory Sync Agent / Shopify only.
+
+### Test
+```bash
+python tests/run_all_tests.py                                  # all phases (phase 7 = support agent)
+python -m pytest tests/phase7_support_agent -v                 # tools + steps 45-50 (Claude client scripted)
+python -m pytest tests/phase7_support_agent/test_live_claude.py -v   # real-model behaviour; needs ANTHROPIC_API_KEY/MODEL
+```
+Tests use a throw-away SQLite database and write their own fixture catalog; only the Anthropic client and the Shopify HTTP call are faked.
+
+---
+
 ## 🔐 Environment Variables Reference
 
 ### Backend (`Backend/.env`)
