@@ -10,13 +10,15 @@
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.sdk.database import get_db
-from src.sdk.models.content import GeneratedPost, BrandVoiceProfile, ImageAsset
+from src.sdk.models.content import GeneratedPost, BrandVoiceProfile, ImageAsset, ImageGenerationUsage
 from src.sdk.event_bus import RedisEventBus
 
 from src.dependencies import get_event_bus
@@ -27,10 +29,32 @@ from src.domains.agents.content_generation.schemas import (
     BrandVoiceCreate, BrandVoiceUpdate, BrandVoiceOut,
 )
 from src.domains.agents.content_generation.handler import ContentGenerationHandler
+from src.domains.agents.content_generation.storage import get_image_storage
 from src.domains.auth.service import get_current_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/content", tags=["Content Generation"])
+
+
+# ─── Daily image-generation limit ─────────────────────────────
+
+async def _reserve_image_generation(db: AsyncSession, user_id: int, post_id: Optional[int] = None) -> None:
+    """Enforce IMAGE_DAILY_LIMIT per user per UTC day (429 when exceeded) and record the attempt."""
+    limit = get_settings().IMAGE_DAILY_LIMIT
+    day_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    used = (await db.execute(
+        select(func.count(ImageGenerationUsage.id)).where(
+            ImageGenerationUsage.user_id == user_id,
+            ImageGenerationUsage.created_at >= day_start,
+        )
+    )).scalar_one()
+    if used >= limit:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Daily image generation limit reached ({limit} per day). Try again tomorrow (resets 00:00 UTC).",
+        )
+    db.add(ImageGenerationUsage(user_id=user_id, post_id=post_id))
+    await db.commit()
 
 
 # ─── Generate Post ────────────────────────────────────────────
@@ -43,13 +67,14 @@ async def generate_post(
     current_user=Depends(get_current_user),
 ):
     """Generate a social media post for a product using AI (LLM council + image gen)."""
+    await _reserve_image_generation(db, current_user.id)
     handler = ContentGenerationHandler(db=db, event_bus=bus)
     try:
         post = await handler.generate_post(
             product_id=body.product_id,
             brand_voice_id=body.brand_voice_id,
             platform=body.platform,
-            image_model=body.image_model,
+            image_style=body.image_style,
             auto_approve=body.auto_approve,
         )
         img_result = await db.execute(
@@ -63,6 +88,8 @@ async def generate_post(
             status=post.status,
             caption=post.caption,
             image_url=image_url,
+            image_status=post.image_status or "none",
+            image_error=post.image_error or "",
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -99,6 +126,8 @@ async def list_posts(
             "caption_preview": p.caption[:150] if p.caption else "",
             "status": p.status,
             "image_model_used": p.image_model_used,
+            "image_status": p.image_status,
+            "image_error": p.image_error,
             "created_at": p.created_at,
             "has_image": len(p.images) > 0,
         }
@@ -109,7 +138,7 @@ async def list_posts(
 @router.get("/posts/{post_id}")
 async def get_post(post_id: int, db: AsyncSession = Depends(get_db), _auth=Depends(get_current_user)):
     """Get single generated post with images."""
-    result = await db.execute(select(GeneratedPost).where(GeneratedPost.id == post_id))
+    result = await db.execute(select(GeneratedPost).options(selectinload(GeneratedPost.images)).where(GeneratedPost.id == post_id))
     post = result.scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -121,6 +150,8 @@ async def get_post(post_id: int, db: AsyncSession = Depends(get_db), _auth=Depen
         "status": post.status,
         "review_notes": post.review_notes,
         "image_model_used": post.image_model_used,
+        "image_status": post.image_status,
+        "image_error": post.image_error,
         "created_at": post.created_at,
         "approved_at": post.approved_at,
         "images": [
@@ -144,7 +175,11 @@ async def approve_post(
     handler = ContentGenerationHandler(db=db, event_bus=bus)
     try:
         post = await handler.approve_post(post_id, body.feedback)
-        return {"message": "Post approved", "post_id": post.id, "status": post.status}
+        resp = {"message": "Post approved", "post_id": post.id, "status": post.status,
+                "has_image": post.image_status == "generated"}
+        if not resp["has_image"]:
+            resp["warning"] = "Approved without an image"
+        return resp
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -179,6 +214,41 @@ async def regenerate_post(
         return {"message": "Post regenerated", "post_id": post.id, "status": post.status}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/posts/{post_id}/regenerate-image")
+async def regenerate_image(
+    post_id: int,
+    image_style: str = "",
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Retry/redo image generation for a post (counts toward the daily limit)."""
+    await _reserve_image_generation(db, current_user.id, post_id)
+    handler = ContentGenerationHandler(db=db)
+    try:
+        post = await handler.regenerate_image(post_id, image_style)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    img_result = await db.execute(select(ImageAsset).where(ImageAsset.post_id == post.id))
+    images = img_result.scalars().all()
+    return {
+        "message": "Image regenerated" if post.image_status == "generated" else "Image generation failed",
+        "post_id": post.id,
+        "image_status": post.image_status,
+        "image_error": post.image_error or "",
+        "image_url": images[0].url if images else "",
+    }
+
+
+@router.get("/images/{key}")
+async def get_image(key: str):
+    """Serve a stored image. Keys are unguessable UUID file names (needed so <img> tags work)."""
+    found = await get_image_storage().get(key)
+    if not found:
+        raise HTTPException(status_code=404, detail="Image not found")
+    data, mime = found
+    return Response(content=data, media_type=mime, headers={"Cache-Control": "public, max-age=86400"})
 
 
 # ─── Brand Voice CRUD ─────────────────────────────────────────

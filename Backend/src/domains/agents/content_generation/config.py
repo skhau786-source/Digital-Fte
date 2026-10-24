@@ -11,6 +11,7 @@
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 from functools import lru_cache
+from typing import Literal
 
 
 class Settings(BaseSettings):
@@ -25,12 +26,16 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
     LLM_MODEL: str = "claude-sonnet-4-6"
 
-    # Image Generation — Gemini or DALL-E 3
+    # Image Generation — Gemini via the google-genai SDK.
+    # IMAGE_PROVIDER=pollinations is a free, keyless provider for DEV TESTING ONLY;
+    # it is refused when ENV=production. Production must use gemini.
+    IMAGE_PROVIDER: Literal["gemini", "pollinations"] = "gemini"
     GEMINI_API_KEY: str = ""
-    DALLE_API_KEY: str = ""
-    IMAGE_MODEL_DEFAULT: str = "gemini-2.0-flash-exp"
-    IMAGE_COUNT: int = 1
-    IMAGE_SIZE: str = "1024x1024"
+    IMAGE_MODEL: str = "gemini-2.5-flash-image"
+    IMAGE_ASPECT_RATIO: str = "1:1"
+    IMAGE_TIMEOUT_SECONDS: int = 60
+    IMAGE_DAILY_LIMIT: int = 20              # max generations per user per UTC day
+    IMAGE_STORAGE_DIR: str = "media/images"  # local disk (relative to Backend/)
 
     # Auto-approve: if True, posts skip human review
     HUMAN_REVIEW_REQUIRED: bool = False

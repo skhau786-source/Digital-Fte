@@ -111,6 +111,11 @@ async def init_db():
             "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS session_id VARCHAR(64);",
             "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS language VARCHAR(20) DEFAULT '';",
             "CREATE UNIQUE INDEX IF NOT EXISTS ix_conversations_session_id ON conversations (session_id);",
+            # Image generation status tracking
+            "ALTER TABLE generated_posts ADD COLUMN IF NOT EXISTS image_status VARCHAR(20) DEFAULT 'none';",
+            "ALTER TABLE generated_posts ADD COLUMN IF NOT EXISTS image_error TEXT DEFAULT '';",
+            "ALTER TABLE generated_posts ALTER COLUMN image_model_used TYPE VARCHAR(100);",
+            "ALTER TABLE image_assets ALTER COLUMN model_used TYPE VARCHAR(100);",
         ):
             try:
                 if engine.dialect.name == "postgresql":

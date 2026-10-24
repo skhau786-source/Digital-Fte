@@ -15,7 +15,7 @@ class GenerateRequest(BaseModel):
     product_id: int
     platform: str = "instagram"              # instagram | facebook | tiktok | linkedin
     brand_voice_id: Optional[int] = None
-    image_model: str = "gemini"              # gemini | dalle3
+    image_style: str = ""                    # e.g. "Modern", "Minimal" (optional)
     auto_approve: Optional[bool] = None      # override global setting
 
 
@@ -48,6 +48,8 @@ class GeneratedPostOut(BaseModel):
     status: str
     review_notes: str = ""
     image_model_used: str = ""
+    image_status: str = "none"
+    image_error: str = ""
     created_at: datetime
     approved_at: Optional[datetime] = None
     images: list = []
@@ -71,6 +73,8 @@ class GenerateResponse(BaseModel):
     status: str
     caption: str = ""
     image_url: str = ""
+    image_status: str = "none"   # none | generated | failed
+    image_error: str = ""
 
 
 class BrandVoiceOut(BaseModel):

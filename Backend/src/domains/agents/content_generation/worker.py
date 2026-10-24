@@ -43,7 +43,7 @@ class ContentGenerationWorker(BaseAgent):
         product_id = payload.get("product_id")
         platform = payload.get("platform", "instagram")
         brand_voice_id = payload.get("brand_voice_id")
-        image_model = payload.get("image_model", "")
+        image_style = payload.get("image_style", "")
         auto_approve = payload.get("auto_approve", None)
 
         if not product_id:
@@ -62,7 +62,7 @@ class ContentGenerationWorker(BaseAgent):
                     product_id=product_id,
                     brand_voice_id=brand_voice_id,
                     platform=platform,
-                    image_model=image_model,
+                    image_style=image_style,
                     auto_approve=auto_approve,
                 )
                 await db.commit()

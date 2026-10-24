@@ -281,12 +281,18 @@ class CollaborationOrchestratorHandler:
                 product_id=prod_id,
                 brand_voice_id=inputs.get("brand_voice_id"),
                 platform=inputs.get("platform", "instagram"),
-                image_model=inputs.get("image_model", "gemini"),
+                image_style=inputs.get("image_style", ""),
             )
             # Auto-approve if requested
+            result = {"status": "ok", "post_id": post.id, "caption": post.caption,
+                      "image_status": post.image_status}
             if inputs.get("auto_approve"):
-                post = await handler.approve_post(post.id)
-            return {"status": "ok", "post_id": post.id, "caption": post.caption}
+                if post.image_status == "generated":
+                    post = await handler.approve_post(post.id)
+                else:
+                    # Never auto-approve (→ publish) a post without a real image
+                    result["auto_approve_skipped"] = "no image (image_status=%s)" % post.image_status
+            return result
 
         elif agent == "content_scheduling":
             handler = ContentSchedulingHandler(self.db)

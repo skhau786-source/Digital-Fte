@@ -8,7 +8,7 @@
 #            1. Research product data (LLM)
 #            2. Write platform-specific caption (LLM)
 #            3. Review caption against brand voice (LLM)
-#            4. Generate image (Gemini / DALL-E 3)
+#            4. Generate image (Gemini) and save via ImageStorage
 #            5. Auto-approve or wait for human review
 #
 # USED BY: worker.py, api.py
@@ -34,7 +34,10 @@ from src.sdk.event_bus import RedisEventBus
 from src.sdk.config import get_settings
 
 from src.domains.agents.content_generation.config import get_settings as get_agent_settings
-from src.domains.agents.content_generation.image_gen import create_image_generator, ImageGenerator
+from src.domains.agents.content_generation.image_gen import (
+    create_image_generator, ImageGenerator, ImageGenerationError,
+)
+from src.domains.agents.content_generation.storage import ImageStorage, get_image_storage
 
 logger = logging.getLogger(__name__)
 
@@ -82,14 +85,14 @@ class ContentGenerationHandler:
         product_id: int,
         brand_voice_id: Optional[int] = None,
         platform: str = "instagram",
-        image_model: str = "",
+        image_style: str = "",
         auto_approve: Optional[bool] = None,
     ) -> GeneratedPost:
         """Full content generation pipeline.
 
         1. Fetch product + brand voice from DB
         2. LLM Council: Research → Write → Review
-        3. Image Generation: via Gemini or DALL-E
+        3. Image Generation: via Gemini (failure → post saved without image)
         4. Save to DB → Auto-approve or wait
         """
         # 1. Fetch product from DB
@@ -126,36 +129,13 @@ class ContentGenerationHandler:
         await self.db.flush()
         await self.db.refresh(post)
 
-        # 7. Generate Image
-        model_name = image_model or self.settings.IMAGE_MODEL_DEFAULT
-        image_gen = self._get_image_generator(model_name)
-
-        # Craft image prompt from product + caption
-        image_prompt = f"Product: {product.title}. Style: {product_data.get('vendor', '')}. "
-        image_prompt += f"Create a professional e-commerce social media image."
-        if review_result.get("suggestions"):
-            image_prompt += f" Context: {review_result['suggestions']}"
-
-        image_result = await image_gen.generate(
-            prompt=image_prompt,
-            size=self.settings.IMAGE_SIZE,
-        )
-
-        # Save ImageAsset
-        image = ImageAsset(
-            post_id=post.id,
-            url=image_result["url"],
-            prompt_used=image_result["prompt_used"],
-            model_used=image_result["model"],
-            status="generated",
-        )
-        self.db.add(image)
-        post.image_model_used = image_result["model"]
+        # 7. Generate Image — failure never loses the post (see image_status / image_error)
+        image = await self._generate_image_for_post(post, product, image_style)
 
         # 8. Auto-approve or leave for human review
         should_auto_approve = auto_approve if auto_approve is not None else not self.settings.HUMAN_REVIEW_REQUIRED
 
-        if should_auto_approve:
+        if should_auto_approve and image is not None:
             post.status = "approved"
             post.approved_at = datetime.now(timezone.utc)
             image.status = "approved"
@@ -164,6 +144,8 @@ class ContentGenerationHandler:
             except Exception:
                 pass
             logger.info(f"  ✅ Auto-approved post #{post.id}")
+        elif should_auto_approve:
+            logger.warning(f"  Post #{post.id} NOT auto-approved: image generation failed")
         else:
             logger.info(f"  ⏳ Post #{post.id} in review — waiting for human approval")
 
@@ -362,17 +344,69 @@ class ContentGenerationHandler:
             "status": product.status,
         }
 
-    def _get_image_generator(self, model_name: str = "") -> ImageGenerator:
-        """Factory-wrapper to create the right image generator."""
-        model_name = model_name or self.settings.IMAGE_MODEL_DEFAULT
+    def _get_image_generator(self) -> ImageGenerator:
+        return create_image_generator(
+            api_key=self.settings.GEMINI_API_KEY or self.fte_settings.GEMINI_API_KEY,
+            model=self.settings.IMAGE_MODEL,
+            aspect_ratio=self.settings.IMAGE_ASPECT_RATIO,
+            timeout_seconds=self.settings.IMAGE_TIMEOUT_SECONDS,
+            provider=self.settings.IMAGE_PROVIDER,
+            environment=self.fte_settings.ENV,
+        )
 
-        if "gemini" in model_name.lower():
-            return create_image_generator("gemini", self.settings.GEMINI_API_KEY or self.fte_settings.GEMINI_API_KEY)
-        elif "dalle" in model_name.lower() or "dall-e" in model_name.lower():
-            return create_image_generator("dalle3", self.settings.DALLE_API_KEY or self.fte_settings.DALLE_API_KEY)
-        else:
-            # Default to Gemini
-            return create_image_generator("gemini", self.settings.GEMINI_API_KEY or self.fte_settings.GEMINI_API_KEY)
+    @staticmethod
+    def _build_image_prompt(product: Product, image_style: str = "") -> str:
+        parts = [f"Professional e-commerce product photo of: {product.title}."]
+        if product.product_type:
+            parts.append(f"Product type: {product.product_type}.")
+        if product.description:
+            parts.append(f"Product details: {product.description.strip()[:400]}")
+        parts.append(f"Visual style: {image_style or 'clean, modern'}. Suitable for a social media post. "
+                     "No text, watermarks or logos in the image.")
+        return " ".join(parts)
+
+    async def _generate_image_for_post(
+        self, post: GeneratedPost, product: Product, image_style: str = "",
+        storage: Optional[ImageStorage] = None,
+    ) -> Optional[ImageAsset]:
+        """Generate + store an image for a post. On failure sets image_status='failed'
+        and image_error, returns None. Caller commits."""
+        storage = storage or get_image_storage()
+        prompt = self._build_image_prompt(product, image_style)
+        try:
+            result = await self._get_image_generator().generate(prompt)
+            url = await storage.save(result.data, result.mime_type)
+        except (ImageGenerationError, ValueError, OSError) as e:
+            post.image_status = "failed"
+            post.image_error = str(e)[:1000]
+            logger.error(f"  Image generation failed for post #{post.id}: {e}")
+            return None
+
+        # Replace any previous image for this post (regenerate)
+        old = await self.db.execute(select(ImageAsset).where(ImageAsset.post_id == post.id))
+        for old_img in old.scalars().all():
+            await storage.delete(old_img.url)
+            await self.db.delete(old_img)
+
+        image = ImageAsset(
+            post_id=post.id, url=url, prompt_used=result.prompt_used,
+            model_used=result.model, status="generated",
+        )
+        self.db.add(image)
+        post.image_model_used = result.model
+        post.image_status = "generated"
+        post.image_error = ""
+        return image
+
+    async def regenerate_image(self, post_id: int, image_style: str = "") -> GeneratedPost:
+        """Retry / redo image generation for an existing post (the Regenerate button)."""
+        post = await self._get_generated_post(post_id)
+        product = await self._get_product(post.product_id)
+        image = await self._generate_image_for_post(post, product, image_style)
+        if image is not None and post.status == "approved":
+            image.status = "approved"
+        await self.db.commit()
+        return post
 
     async def _publish_approved_event(self, post: GeneratedPost, image: Optional[ImageAsset]):
         """Publish ContentApprovedEvent → Agent 2 picks it up for scheduling."""

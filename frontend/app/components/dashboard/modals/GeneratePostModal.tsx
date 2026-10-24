@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Image, Sparkles } from "lucide-react";
 import { useToast } from "@/app/components/providers/ToastProvider";
 import { apiFetch } from "@/app/lib/api";
+import { buildApiUrl } from "@/app/lib/config";
 
 interface GeneratePostModalProps {
   isOpen: boolean;
@@ -18,7 +19,16 @@ export function GeneratePostModal({ isOpen, onClose }: GeneratePostModalProps) {
   const [imageStyle, setImageStyle] = useState("Modern");
   const [captionTone, setCaptionTone] = useState("Viral");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedPost, setGeneratedPost] = useState<{ image: string; caption: string } | null>(null);
+  const [generatedPost, setGeneratedPost] = useState<{
+    postId: number;
+    image: string;
+    imageStatus: string;
+    imageError: string;
+    caption: string;
+  } | null>(null);
+  const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [approved, setApproved] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -55,22 +65,68 @@ export function GeneratePostModal({ isOpen, onClose }: GeneratePostModalProps) {
         body: JSON.stringify({
           product_id: Number(selectedProduct),
           platform: "instagram",
-          image_model: "gemini",
+          image_style: imageStyle,
         }),
       });
 
       if (res && res.caption) {
+        setApproved(false);
         setGeneratedPost({
-          image: res.image_url || "🖼️",
+          postId: res.post_id,
+          image: res.image_url ? buildApiUrl(res.image_url) : "",
+          imageStatus: res.image_status || "none",
+          imageError: res.image_error || "",
           caption: res.caption,
         });
-        showToast(`🎨 AI Magic generated ${captionTone} campaign post!`, "success");
+        if (res.image_status === "failed") {
+          showToast("Caption generated, but the image failed. Use Regenerate Image to retry.", "error");
+        } else {
+          showToast(`🎨 AI Magic generated ${captionTone} campaign post!`, "success");
+        }
       }
     } catch (err: any) {
       console.error("Content generation error:", err);
       showToast(err.message || "Failed to generate AI post. Check API key.", "error");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const approvePost = async () => {
+    if (!generatedPost) return;
+    setIsApproving(true);
+    try {
+      const res = await apiFetch<any>(`/api/v1/content/posts/${generatedPost.postId}/approve`, { method: "POST" });
+      setApproved(true);
+      if (res?.warning) showToast(`${res.warning} — no image is attached to this post.`, "info");
+      else showToast("Post approved", "success");
+    } catch (err: any) {
+      showToast(err.message || "Failed to approve post", "error");
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const regenerateImage = async () => {
+    if (!generatedPost) return;
+    setIsRegeneratingImage(true);
+    try {
+      const res = await apiFetch<any>(
+        `/api/v1/content/posts/${generatedPost.postId}/regenerate-image?image_style=${encodeURIComponent(imageStyle)}`,
+        { method: "POST" },
+      );
+      setGeneratedPost({
+        ...generatedPost,
+        image: res.image_url ? buildApiUrl(res.image_url) : "",
+        imageStatus: res.image_status || "none",
+        imageError: res.image_error || "",
+      });
+      if (res.image_status === "generated") showToast("Image regenerated", "success");
+      else showToast(res.image_error || "Image generation failed", "error");
+    } catch (err: any) {
+      showToast(err.message || "Failed to regenerate image", "error");
+    } finally {
+      setIsRegeneratingImage(false);
     }
   };
 
@@ -186,22 +242,26 @@ export function GeneratePostModal({ isOpen, onClose }: GeneratePostModalProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white rounded-xl p-4 border border-slate-200 flex items-center justify-center min-h-[250px]">
                 <div className="text-center w-full">
-                  {generatedPost.image && generatedPost.image.startsWith("http") ? (
+                  {generatedPost.imageStatus === "generated" && generatedPost.image ? (
                     <img
                       src={generatedPost.image}
                       alt="AI Generated"
                       className="max-h-[200px] w-auto mx-auto rounded-lg object-contain shadow-sm"
+                      onError={() => setGeneratedPost((p) => p && { ...p, imageStatus: "failed", imageError: "Image file could not be loaded" })}
                     />
                   ) : (
-                    <span className="text-7xl">🖼️</span>
+                    <div className="text-xs text-red-600 px-2">
+                      <p className="font-bold">Image not available</p>
+                      {generatedPost.imageError && <p className="mt-1">{generatedPost.imageError}</p>}
+                    </div>
                   )}
                   <p className="text-xs text-slate-500 mt-2">{imageStyle} Style</p>
                   <button
-                    onClick={generatePost}
-                    disabled={isGenerating}
+                    onClick={regenerateImage}
+                    disabled={isGenerating || isRegeneratingImage}
                     className="mt-2 text-[10px] text-pink-600 hover:text-pink-800 font-bold cursor-pointer"
                   >
-                    🔄 Regenerate Image
+                    {isRegeneratingImage ? "Generating…" : "🔄 Regenerate Image"}
                   </button>
                 </div>
               </div>
@@ -216,6 +276,16 @@ export function GeneratePostModal({ isOpen, onClose }: GeneratePostModalProps) {
                     <span className="text-[8px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">#Style</span>
                   </div>
                 </div>
+                {generatedPost.imageStatus !== "generated" && !approved && (
+                  <p className="mt-3 text-[10px] text-amber-700 font-bold">⚠️ Approving without an image</p>
+                )}
+                <button
+                  onClick={approvePost}
+                  disabled={isApproving || approved}
+                  className="mt-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg px-3 py-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {approved ? "✅ Approved" : isApproving ? "Approving…" : generatedPost.imageStatus === "generated" ? "Approve" : "Approve without image"}
+                </button>
                 <button
                   onClick={generatePost}
                   disabled={isGenerating}

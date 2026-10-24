@@ -19,6 +19,8 @@ requests>=2.32.3
 
 # LLM — Google Gemini (content gen, comment engagement, customer support, analytics)
 google-generativeai>=0.8.0
+# Image generation � official Google GenAI SDK (gemini-2.5-flash-image)
+google-genai>=1.0.0
 
 # LLM — Claude (storefront Customer Support Agent)
 anthropic>=1.0.0

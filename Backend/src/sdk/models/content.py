@@ -47,7 +47,9 @@ class GeneratedPost(Base):
     caption = Column(Text, default="")
     status = Column(String(50), default="draft")             # draft | review | approved | rejected
     review_notes = Column(Text, default="")
-    image_model_used = Column(String(50), default="")        # "gemini" | "dalle3" | ""
+    image_model_used = Column(String(100), default="")       # model id used, "" if none
+    image_status = Column(String(20), default="none")        # none | generated | failed
+    image_error = Column(Text, default="")                   # failure reason when image_status = failed
     scheduled_post_id = Column(Integer, ForeignKey("scheduled_posts.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     approved_at = Column(DateTime(timezone=True), nullable=True)
@@ -65,8 +67,20 @@ class ImageAsset(Base):
     post_id = Column(Integer, ForeignKey("generated_posts.id"), nullable=False, index=True)
     url = Column(String(512), nullable=False)
     prompt_used = Column(Text, default="")
-    model_used = Column(String(50), default="gemini")        # "gemini" | "dalle3"
+    model_used = Column(String(100), default="")             # e.g. "gemini-2.5-flash-image"
     status = Column(String(50), default="generated")         # generated | approved | rejected
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     post = relationship("GeneratedPost", back_populates="images")
+
+
+# ─── ImageGenerationUsage ─────────────────────────────────────
+# One row per image-generation attempt; used for the per-user daily limit.
+
+class ImageGenerationUsage(Base):
+    __tablename__ = "image_generation_usage"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    post_id = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
