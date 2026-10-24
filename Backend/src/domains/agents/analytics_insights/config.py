@@ -5,8 +5,9 @@
 # ═══════════════════════════════════════════════════════════════
 
 from functools import lru_cache
-from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
+from typing import Annotated
+from pydantic_settings import BaseSettings, NoDecode
+from pydantic import ConfigDict, field_validator
 
 
 class Settings(BaseSettings):
@@ -31,7 +32,15 @@ class Settings(BaseSettings):
     # Security
     AUTH_ENABLED: bool = False
     API_KEYS: list[str] = ["dev-key-123"]
-    CORS_ORIGINS: list[str] = ["*"]
+    CORS_ORIGINS: Annotated[list[str], NoDecode] = ["*"]
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def _split_cors(cls, v):
+        # .env supplies a comma-separated string, not JSON
+        if isinstance(v, str):
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v
 
     model_config = ConfigDict(
         env_file=".env",

@@ -18,6 +18,7 @@ from slowapi.util import get_remote_address
 
 from src.sdk.config import get_settings
 from src.sdk.database import init_db
+from src.sdk.agent_base import BaseAgent
 from src.dependencies import init_event_bus, close_event_bus, close_llm_client
 from src.domains.auth.routes import router as auth_router
 from src.domains.ecommerce import routes_router, webhooks_router, oauth_router
@@ -74,7 +75,19 @@ async def _start_workers():
     for mod_path in worker_modules:
         try:
             module = __import__(mod_path, fromlist=["worker"])
-            w = getattr(module, "worker")
+            w = getattr(module, "worker", None)
+            if w is None:
+                # Agent modules define a BaseAgent subclass and only instantiate it under __main__
+                cls = next(
+                    (c for c in vars(module).values()
+                     if isinstance(c, type) and issubclass(c, BaseAgent)
+                     and c is not BaseAgent and c.__module__ == module.__name__),
+                    None,
+                )
+                if cls is None:
+                    raise AttributeError("no worker instance or BaseAgent subclass")
+                w = cls()
+                w.embedded = True  # server owns signal handling
             tasks.append(asyncio.create_task(w.run()))
             logger.info(f"Worker started: {mod_path.split('.')[-2]}")
         except Exception as e:

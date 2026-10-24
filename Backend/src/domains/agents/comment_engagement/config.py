@@ -7,8 +7,9 @@
 # USED BY: handler.py, meta_client.py, worker.py, api.py
 # ═══════════════════════════════════════════════════════════════
 
-from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
+from typing import Annotated
+from pydantic_settings import BaseSettings, NoDecode
+from pydantic import ConfigDict, field_validator
 from functools import lru_cache
 
 
@@ -46,11 +47,19 @@ class Settings(BaseSettings):
     API_KEYS: list[str] = ["dev-key-change-me"]
 
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    CORS_ORIGINS: Annotated[list[str], NoDecode] = ["http://localhost:3000", "http://localhost:5173"]
 
     # Server
     HOST: str = "0.0.0.0"
     PORT: int = 8004
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def _split_cors(cls, v):
+        # .env supplies a comma-separated string, not JSON
+        if isinstance(v, str):
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v
 
     model_config = ConfigDict(
         env_file=".env",
